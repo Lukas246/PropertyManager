@@ -1,0 +1,52 @@
+<%= form_with(model: asset) do |form| %>
+  <% if asset.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(asset.errors.count, "error") %> prohibited this asset from being saved:</h2>
+
+      <ul>
+        <% asset.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :code, style: "display: block" %>
+    <%= form.text_field :code %>
+  </div>
+
+  <div>
+    <%= form.label :room_id, style: "display: block" %>
+    <%= form.text_field :room_id %>
+  </div>
+
+  <div>
+    <%= form.label :purchase_date, style: "display: block" %>
+    <%= form.date_field :purchase_date %>
+  </div>
+
+  <div>
+    <%= form.label :last_inspection_date, style: "display: block" %>
+    <%= form.date_field :last_inspection_date %>
+  </div>
+
+  <div>
+    <%= form.label :note, style: "display: block" %>
+    <%= form.textarea :note %>
+  </div>
+
+  <div>
+    <%= form.label :purchase_price, style: "display: block" %>
+    <%= form.text_field :purchase_price %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
