@@ -1,8 +1,9 @@
-<%= form_with(model: asset) do |form| %>
+<%= form_with(model: asset, html: { style: "max-width: 600px; font-family: sans-serif;" }) do |form| %>
+
   <% if asset.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(asset.errors.count, "chyba") %> zabránila uložení majetku:</h2>
-      <ul>
+    <div style="background: #fff5f5; border-left: 4px solid #f56565; color: #c53030; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+      <h2 style="font-size: 1.1rem; margin-top: 0;"><%= pluralize(asset.errors.count, "chyba") %> zabránila uložení:</h2>
+      <ul style="margin: 0; padding-left: 20px;">
         <% asset.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -10,50 +11,71 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :name, "Název*" %>
-    <%= form.text_field :name %>
+  <%# --- ZÁKLADNÍ ÚDAJE --- %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <%= form.label :name, "Název majetku*", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+      <%= form.text_field :name, style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
+    </div>
+    <div>
+      <%= form.label :code, "Inventární kód*", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+      <%= form.text_field :code, style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
+    </div>
   </div>
 
-  <div>
-    <%= form.label :code, "Kód*" %>
-    <%= form.text_field :code %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :room_id, "Umístění (místnost)*", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.collection_select :room_id, Room.all, :id, :name, { prompt: "Vyberte místnost" }, { style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" } %>
   </div>
 
-  <div>
-    <%= form.label :room_id, "Místnost*" %>
-    <%# Místo text_field použijeme výběr ze všech existujících místností %>
-    <%= form.collection_select :room_id, Room.all, :id, :name, prompt: "Vyberte místnost" %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+    <div>
+      <%= form.label :purchase_date, "Datum nákupu*", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+      <%= form.date_field :purchase_date, style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
+    </div>
+    <div>
+      <%= form.label :last_inspection_date, "Poslední kontrola*", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+      <%= form.date_field :last_inspection_date, style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
+    </div>
   </div>
 
-  <div>
-    <%= form.label :purchase_date, "Datum nákupu*" %>
-    <%= form.date_field :purchase_date %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :purchase_price, "Pořizovací cena (Kč)", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.number_field :purchase_price, style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
   </div>
 
-  <div>
-    <%= form.label :last_inspection_date, "Datum poslední kontroly*" %>
-    <%= form.date_field :last_inspection_date %>
+  <div style="margin-bottom: 20px;">
+    <%= form.label :note, "Interní poznámka", style: "display: block; font-weight: bold; margin-bottom: 5px;" %>
+    <%= form.text_area :note, rows: 3, style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
   </div>
 
-  <div>
-    <%= form.label :note, "Poznámka" %>
-    <%# OPRAVA: text_area místo textarea %>
-    <%= form.text_area :note %>
+  <%# --- PŘÍLOHY (Důležité pro zadání) --- %>
+  <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; background-color: #f8fafc; margin-bottom: 25px;">
+    <h3 style="margin-top: 0; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">📎 Správa příloh</h3>
+
+    <% if asset.attachments.attached? %>
+      <p style="font-size: 0.85rem; font-weight: bold; color: #4a5568;">Stávající soubory:</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+        <% asset.attachments.each do |attachment| %>
+          <div style="background: white; border: 1px solid #cbd5e0; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+            <span><%= attachment.filename %></span>
+            <%= link_to "×", purge_attachment_asset_path(asset, attachment_id: attachment.id),
+                        data: { turbo_method: :delete, turbo_confirm: "Odstranit tuto přílohu?" },
+                        style: "color: #e53e3e; font-weight: bold; text-decoration: none; font-size: 1.1rem; line-height: 1;" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div>
+      <%= form.label :attachments, asset.attachments.attached? ? "➕ Přidat další soubory" : "Nahrát přílohy (faktury, foto)", style: "display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px;" %>
+      <%= form.file_field :attachments, multiple: true, style: "font-size: 0.85rem;" %>
+      <p style="font-size: 0.75rem; color: #718096; margin-top: 5px;">Můžete vybrat více souborů najednou. Stávající přílohy zůstanou zachovány.</p>
+    </div>
   </div>
 
-  <div>
-    <%= form.label :purchase_price, "Cena nákupu" %>
-    <%= form.text_field :purchase_price %>
-  </div>
-
-  <div style="margin-bottom: 15px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #f9f9f9;">
-    <%= form.label :attachments, "Přílohy majetku (faktury, návody, fotky)", style: "display: block; font-weight: bold;" %>
-    <p style="font-size: 0.8em; color: #666;">Můžete vybrat více souborů najednou.</p>
-    <%= form.file_field :attachments, multiple: true, style: "margin-top: 5px;" %>
-  </div>
-
-  <div style="margin-top: 20px;">
-    <%= form.submit "Uložit majetek" %>
+  <div style="display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 20px;">
+    <%= form.submit "Uložit změny", style: "background: #3182ce; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-weight: bold;" %>
+    <%= link_to "Zrušit", assets_path, style: "text-decoration: none; color: #4a5568; padding: 10px 15px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.9rem;" %>
   </div>
 <% end %>

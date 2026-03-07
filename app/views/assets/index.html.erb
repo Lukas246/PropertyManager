@@ -1,19 +1,97 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, "Evidence majetku" %>
 
-<% content_for :title, "Assets" %>
+<h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px;">
+  📦 Evidence a správa majetku
+</h1>
 
-<h1>Assets</h1>
+<%# Filtrační panel %>
+<div style="background: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+  <h4 style="margin-top: 0; color: #555; display: flex; align-items: center; gap: 8px;">
+    🔍 Filtrování dat
+  </h4>
 
-<div id="assets">
-  <% @assets.each do |asset| %>
-    <%= render asset %>
-    <p>
-      <%= link_to "Detail", asset %>
-      <% if can? :update, asset %>
-        <%= link_to 'Upravit', edit_asset_path(asset) %>
-      <% end %>
-    </p>
+  <%= form_with url: assets_path, method: :get, local: true do |f| %>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+
+      <div>
+        <%= f.label :query, "Hledat (název, kód, poznámka)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.text_field :query, value: params[:query], placeholder: "Zadejte text...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
+      </div>
+
+      <div>
+        <%= f.label :room_id, "Místnost", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.collection_select :room_id, Room.all, :id, :name, { include_blank: "Všechny místnosti", selected: params[:room_id] }, { style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" } %>
+      </div>
+
+      <div>
+        <%= f.label :purchase_date_from, "Nakoupeno od", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.date_field :purchase_date_from, value: params[:purchase_date_from], style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
+      </div>
+
+      <div>
+        <%= f.label :purchase_date_to, "Nakoupeno do", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.date_field :purchase_date_to, value: params[:purchase_date_to], style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
+      </div>
+
+      <div>
+        <%= f.label :price_from, "Minimální cena (Kč)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.number_field :price_from, value: params[:price_from], placeholder: "Od...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
+      </div>
+
+      <div>
+        <%= f.label :price_to, "Maximální cena (Kč)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
+        <%= f.number_field :price_to, value: params[:price_to], placeholder: "Do...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #eee; padding-top: 15px;">
+      <%# Sjednocený styl pro submit tlačítko %>
+      <%= f.submit "Použít filtry", name: nil, style: "background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center;" %>
+
+      <%# Sjednocený styl pro odkaz (Zrušit) %>
+      <%= link_to "Zrušit vše", assets_path, style: "background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" %>
+
+      <%# Exportní tlačítko %>
+      <%= link_to "📊 Exportovat CSV", assets_path(request.query_parameters.merge(format: :csv)), style: "background: #28a745; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-left: auto; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" %>
+    </div>
   <% end %>
 </div>
 
-<%= link_to "New asset", new_asset_path %>
+<%# Tabulka majetku %>
+<div style="overflow-x: auto; background: white; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+    <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+      <th style="padding: 12px 15px;">Název majetku</th>
+      <th style="padding: 12px 15px;">Kód</th>
+      <th style="padding: 12px 15px;">Umístění</th>
+      <th style="padding: 12px 15px;">Cena</th>
+      <th style="padding: 12px 15px; text-align: right;">Akce</th>
+    </tr>
+    </thead>
+    <tbody id="assets">
+    <% @assets.each do |asset| %>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 12px 15px; font-weight: 500;"><%= asset.name %></td>
+        <td style="padding: 12px 15px;"><code style="background: #f1f1f1; padding: 2px 4px; border-radius: 3px;"><%= asset.code %></code></td>
+        <td style="padding: 12px 15px; font-size: 0.9rem; color: #666;">
+          <%= asset.room.building.name %> / <%= asset.room.name %>
+        </td>
+        <td style="padding: 12px 15px;"><%= number_to_currency(asset.purchase_price, unit: "Kč", format: "%n %u", precision: 0) %></td>
+        <td style="padding: 12px 15px; text-align: right; white-space: nowrap;">
+          <%= link_to "Detail", asset, style: "color: #007bff; text-decoration: none; margin-right: 10px;" %>
+          <% if can? :update, asset %>
+            <%= link_to 'Upravit', edit_asset_path(asset), style: "color: #ffc107; text-decoration: none;" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div style="margin-top: 25px; text-align: right;">
+  <% if can? :create, Asset %>
+    <%= link_to "➕ Přidat nový majetek", new_asset_path, style: "background: #007bff; color: white; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 6px rgba(0,123,255,0.2);" %>
+  <% end %>
+</div>

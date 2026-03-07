@@ -6,6 +6,12 @@ Rails.application.routes.draw do
   resources :assets, path: "inventory"
   resources :users
 
+  resources :assets do
+    member do
+      delete :purge_attachment
+    end
+  end
+
   # 2. Cesty pro API (JSON)
   namespace :api do
     namespace :v1 do
