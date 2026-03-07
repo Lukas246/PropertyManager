@@ -1,29 +1,53 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= content_for(:title) || "Property Manager" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Property Manager">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head>
+  <title>Property Manager</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+</head>
 
-    <%= yield :head %>
+<body style="font-family: sans-serif; line-height: 1.6; padding: 20px;">
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+<header style="border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+  <nav>
+    <% if user_signed_in? %>
+      <div style="float: right;">
+        Přihlášen jako: <strong><%= current_user.email %></strong> [<%= current_user.role %>] |
+        <%= link_to "Odhlásit", destroy_user_session_path, data: { turbo_method: :delete, turbo_confirm: "Opravdu se chcete odhlásit?" }, style: "color: red;" %>
+      </div>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+      <div style="display: flex; gap: 15px;">
+        <%= link_to "🏠 Budovy", buildings_path, data: { turbo: false } %>
+        <%= link_to "🚪 Místnosti", rooms_path, data: { turbo: false } %>
+        <%= link_to "📦 Majetek", assets_path, data: { turbo: false } %>
+        <% if can? :manage, User %>
+          <%= link_to "👥 Uživatelé", users_path, data: { turbo: false } %>
+        <% end %>
+      </div>
+    <% else %>
+      <strong>Property Manager System</strong>
+    <% end %>
+  </nav>
+</header>
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+<%# Flash zprávy pro upozornění (úspěch/chyba) %>
+<% if notice %>
+  <p style="padding: 10px; background: #d4edda; color: #155724; border-radius: 5px;"><%= notice %></p>
+<% end %>
+<% if alert %>
+  <p style="padding: 10px; background: #f8d7da; color: #721c24; border-radius: 5px;"><%= alert %></p>
+<% end %>
 
-  <body>
-    <%= yield %>
-  </body>
+<main>
+  <%= yield %>
+</main>
+
+<footer style="margin-top: 50px; border-top: 1px solid #eee; font-size: 0.8em; color: #888;">
+  &copy; <%= Time.now.year %> Property Manager - Inventurní systém
+</footer>
+
+</body>
 </html>

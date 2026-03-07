@@ -1,10 +1,147 @@
-<p style="color: green"><%= notice %></p>
 
-<%= render @asset %>
+<div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+  <h1 style="margin-top: 0; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
+    📦 Detail majetku: <%= @asset.name %>
+  </h1>
 
-<div>
-  <%= link_to "Edit this asset", edit_asset_path(@asset) %> |
-  <%= link_to "Back to assets", assets_path %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
 
-  <%= button_to "Destroy this asset", @asset, method: :delete %>
+    <%# Levý sloupec: Základní info %>
+    <div>
+      <p><strong>Identifikační kód:</strong> <code style="background: #eee; padding: 2px 5px;"><%= @asset.code %></code></p>
+      <p><strong>Umístění:</strong>
+        <%= @asset.room.building.name %> — <%= @asset.room.name %>
+        <small style="color: #666;">(Kód místnosti: <%= @asset.room.code %>)</small>
+      </p>
+      <p><strong>Pořizovací cena:</strong> <%= number_to_currency(@asset.purchase_price, unit: "Kč", format: "%n %u", precision: 0) %></p>
+    </div>
+
+    <%# Pravý sloupec: Termíny %>
+    <div>
+      <p><strong>Datum nákupu:</strong> <%= @asset.purchase_date.strftime("%d. %m. %Y") %></p>
+      <p><strong>Poslední kontrola:</strong>
+        <span style="color: <%= @asset.last_inspection_date < 1.year.ago ? 'red' : 'green' %>;">
+          <%= @asset.last_inspection_date.strftime("%d. %m. %Y") %>
+        </span>
+      </p>
+      <p><strong>Poznámka:</strong><br>
+        <i style="color: #555;"><%= @asset.note.presence || "Bez poznámky" %></i>
+      </p>
+    </div>
+  </div>
+
+  <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+  <%#  SEKCE PŘÍLOH %>
+  <section>
+    <h3 style="display: flex; align-items: center; gap: 10px;">
+      📎 Přílohy k majetku
+      <span style="background: #007bff; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.7em;">
+        <%= @asset.attachments.count %>
+      </span>
+    </h3>
+
+    <% if @asset.attachments.attached? %>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+        <% @asset.attachments.each do |attachment| %>
+          <div style="border: 1px solid #eee; padding: 10px; border-radius: 5px; background: #fafafa; text-align: center;">
+            <% if attachment.variable? %>
+              <%# Vygeneruje náhled 150x150 px %>
+              <%= image_tag attachment.variant(resize_to_limit: [150, 150]), style: "border-radius: 3px; margin-bottom: 5px; border: 1px solid #ccc;" %>
+            <% elsif attachment.previewable? %>
+              <%# Pro PDF soubory - vygeneruje náhled první stránky %>
+              <%= image_tag attachment.preview(resize_to_limit: [150, 150]), style: "border-radius: 3px; margin-bottom: 5px;" %>
+            <% else %>
+              <%# Pro vše ostatní (ZIP, Word, atd.) zobrazíme ikonu %>
+              <div style="height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3em; background: #eee;">📄</div>
+            <% end %>
+
+            <div style="font-size: 0.85em; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<%= attachment.filename %>">
+              <%= attachment.filename %>
+            </div>
+
+            <div style="display: flex; justify-content: space-around; font-size: 0.9em;">
+              <%= link_to "Zobrazit", url_for(attachment), target: "_blank", style: "color: #007bff; text-decoration: none;" %>
+              <%= link_to "Stáhnout", rails_blob_path(attachment, disposition: "attachment"), style: "color: #28a745; text-decoration: none;" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p style="color: #999; font-style: italic; background: #fdfdfd; padding: 15px; border: 1px dashed #ccc;">
+        Žádné nahrané faktury, návody ani fotografie.
+      </p>
+    <% end %>
+  </section>
+
+  <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+  <%# --- OVLÁDACÍ TLAČÍTKA --- %>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <% if can? :update, @asset %>
+      <%= link_to "✏️ Upravit majetek", edit_asset_path(@asset), style: "background: #ffc107; color: #000; padding: 8px 15px; border-radius: 4px; text-decoration: none; font-weight: bold;" %>
+    <% end %>
+
+    <%= link_to "⬅️ Zpět na seznam", assets_path, style: "background: #6c757d; color: #fff; padding: 8px 15px; border-radius: 4px; text-decoration: none;" %>
+
+    <% if can? :destroy, @asset %>
+      <%= button_to "🗑️ Smazat záznam", @asset, method: :delete,
+                    form: { style: "display:inline-block;" },
+                    data: { turbo_confirm: "Opravdu chcete tento majetek trvale odstranit?" },
+                    style: "background: #dc3545; color: #fff; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer;" %>
+    <% end %>
+  </div>
+  <hr style="margin: 40px 0;">
+
+  <section>
+    <h3>📜 Historie změn (Audit Log)</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+      <thead>
+      <tr style="background: #f4f4f4; text-align: left;">
+        <th style="padding: 10px; border: 1px solid #ddd;">Kdy</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Kdo</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Akce</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Změněná data</th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @asset.versions.reverse.each do |version| %>
+        <tr>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            <%= version.created_at.strftime("%d.%m.%Y %H:%M") %>
+          </td>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            <%# Najdeme uživatele podle ID uloženého v logu %>
+            <%= User.find_by(id: version.whodunnit)&.email || "Systém/Neznámý" %>
+          </td>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            <span style="padding: 3px 6px; border-radius: 3px; background: <%= version.event == 'create' ? '#d4edda' : '#fff3cd' %>;">
+              <%= version.event.upcase %>
+            </span>
+          </td>
+          <td style="padding: 10px; border: 1px solid #ddd;">
+            <% if version.event == 'create' %>
+              <span style="color: #666;">Prvotní záznam</span>
+            <% elsif version.respond_to?(:object_changes) && version.object_changes.present? %>
+              <%# PaperTrail v novějších verzích ukládá změny jako Hash v metodě changeset %>
+              <ul style="margin: 0; padding-left: 20px;">
+                <% version.changeset.each do |attribute, values| %>
+                  <% next if ['updated_at', 'id'].include?(attribute) %>
+                  <li>
+                    <strong><%= attribute %>:</strong>
+                    <span style="color: #999; text-decoration: line-through;"><%= values[0].presence || "prazdne" %></span>
+                    →
+                    <span style="color: green; font-weight: bold;"><%= values[1] %></span>
+                  </li>
+                <% end %>
+              </ul>
+            <% else %>
+              <small style="color: #ca6500;">Změna uložena bez detailů (zkuste znovu editovat)</small>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </section>
 </div>

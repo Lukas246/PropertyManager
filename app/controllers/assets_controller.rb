@@ -1,4 +1,5 @@
 class AssetsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_asset, only: %i[ show edit update destroy ]
 
   # GET /assets or /assets.json
@@ -65,6 +66,6 @@ class AssetsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def asset_params
-      params.expect(asset: [ :name, :code, :room_id, :purchase_date, :last_inspection_date, :note, :purchase_price ])
+      params.expect(asset: [ :name, :code, :room_id, :purchase_date, :last_inspection_date, :note, :purchase_price, attachments: [] ])
     end
 end

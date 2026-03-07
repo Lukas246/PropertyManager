@@ -8,7 +8,10 @@
   <% @assets.each do |asset| %>
     <%= render asset %>
     <p>
-      <%= link_to "Show this asset", asset %>
+      <%= link_to "Detail", asset %>
+      <% if can? :update, asset %>
+        <%= link_to 'Upravit', edit_asset_path(asset) %>
+      <% end %>
     </p>
   <% end %>
 </div>

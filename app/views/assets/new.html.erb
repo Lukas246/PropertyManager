@@ -1,11 +1,6 @@
-<% content_for :title, "New asset" %>
-
-<h1>New asset</h1>
+<h1>Nový majetek</h1>
 
 <%= render "form", asset: @asset %>
 
 <br>
-
-<div>
-  <%= link_to "Back to assets", assets_path %>
-</div>
+<%= link_to "Zpět na seznam", assets_path %>
