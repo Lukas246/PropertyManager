@@ -1,24 +1,31 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Projekt je rozpracovaný a obsahuje i provizorní views. 
 
-Things you may want to cover:
+## Požadavky
+- Ruby 3.x
+- Rails 7.x
+- SQLite3
+- ImageMagick nebo vips (pro náhledy příloh)
 
-* Ruby version
 
-* System dependencies
 
-* Configuration
+- spustit `bundle install`
+- vytvořit databázi `rails db:create`
+- vytvořit tabulky `rails db:migrate`
+- vytvořit data `rails db:seed`
+- spustit `rails server`
 
-* Database creation
+## Úlohy z přůběžného úkolu
 
-* Database initialization
+1. Projekt bude obsahovat tabulky pro jednotlivé entity, bude mít definované relace
+   mezi nimi a validace (ŘEŠENO)
+2. V aplikaci budou dostupné API endpointy, přístupné přes Api-Klíč 
+   a. endpoint pro výpis majetku - ŘEŠENO (controllers/api/v1/assets_controller.rb)
+   b. endpoint pro vytvoření/úpravu/smazání majetku - ŘEŠENO (controllers/api/v1/assets_controller.rb)
+3. Jednotlivé entity budou mít napsané testy
+   a. validace, asociace ŘEŠENO (spec/models)
+   b. API endpointy ŘEŠENO (spec/requests)
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Admin uživatel: username: admin@seznam.cz, password: password123
+Správce uživatel: username: spravce.a@seznam.cz, password: password123
