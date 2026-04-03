@@ -41,6 +41,18 @@
     <%= form.date_field :building_created_at %>
   </div>
 
+  <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+    <strong>Přiřazení správců:</strong>
+    <p style="font-size: 0.8em; color: #666;">Vyberte uživatele s rolí správce, kteří mají k této budově přístup.</p>
+
+    <%= form.collection_check_boxes :manager_ids, User.where(role: :spravce), :id, :email do |b| %>
+      <div style="display: block;">
+        <%= b.check_box %>
+        <%= b.label %>
+      </div>
+    <% end %>
+  </div>
+
   <div>
     <%= form.submit %>
   </div>

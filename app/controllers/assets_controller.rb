@@ -4,6 +4,15 @@ class AssetsController < ApplicationController
 
   # GET /assets or /assets.json
   def index
+    if current_user.role == "admin"
+      @assets = Asset.all
+    elsif current_user.role == "spravce"
+      @assets = Asset.joins(room: { building: :building_assignments })
+                     .where(building_assignments: { user_id: current_user.id })
+    else
+      @assets = Asset.none # Nebo jen read-only pokud chceš
+    end
+
     # 1. Fulltextové vyhledávání (Název, Kód, Poznámka)
     if params[:query].present?
       q = "%#{params[:query]}%"

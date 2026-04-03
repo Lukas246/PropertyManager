@@ -7,10 +7,13 @@ class Ability
     if user.admin? # Superadmin
       can :manage, :all
     elsif user.spravce? # Správce objektu
-      can :read, :all
-      # CRUD jen pro majetek v budovách, které spravuje (logiku doladíme později)
-      can :manage, Asset
-      can :manage, Room
+
+      can :read, Building, building_assignments: { user_id: user.id }
+      can :update, Building, building_assignments: { user_id: user.id }
+
+      # To samé pro místnosti a majetek
+      can :manage, Room, building: { building_assignments: { user_id: user.id } }
+      can :manage, Asset, room: { building: { building_assignments: { user_id: user.id } } }
     elsif user.ctenar? # Čtenář
       can :read, :all
     end

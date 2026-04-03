@@ -7,7 +7,7 @@ RSpec.describe Building, type: :model do
     expect(association.macro).to eq :has_many
   end
 
-  # Test validací (povinná pole dle zadání *)
+  # Test validací
   it "není validní bez povinných polí" do
     building = Building.new(name: nil, code: nil, contact_person_email: nil)
     expect(building).not_to be_valid

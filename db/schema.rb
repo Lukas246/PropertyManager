@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_165011) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_03_125059) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -50,6 +50,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_165011) do
     t.integer "room_id", null: false
     t.datetime "updated_at", null: false
     t.index ["room_id"], name: "index_assets_on_room_id"
+  end
+
+  create_table "building_assignments", force: :cascade do |t|
+    t.integer "building_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["building_id"], name: "index_building_assignments_on_building_id"
+    t.index ["user_id"], name: "index_building_assignments_on_user_id"
   end
 
   create_table "buildings", force: :cascade do |t|
@@ -105,5 +114,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_165011) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "assets", "rooms"
+  add_foreign_key "building_assignments", "buildings"
+  add_foreign_key "building_assignments", "users"
   add_foreign_key "rooms", "buildings"
 end

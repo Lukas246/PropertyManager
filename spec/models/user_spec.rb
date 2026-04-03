@@ -7,7 +7,7 @@ RSpec.describe User, type: :model do
   end
 
   it "vyžaduje unikátní e-mail" do
-    User.create!(full_name: "Jan", email: "jan@test.cz", role: "admin", member_code: "1")
+    User.create!(full_name: "Jan", email: "jan@test.cz", password: "abcdefg", role: "admin", member_code: "1")
     duplicate = User.new(email: "jan@test.cz")
     expect(duplicate).not_to be_valid
   end

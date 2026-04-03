@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Assets", type: :request do
-  let!(:user) { User.create!(full_name: "Admin", email: "a@b.cz", role: "admin", member_code: "123") }
+  let!(:user) { User.create!(full_name: "Admin", email: "a@b.cz", password: "abcdefg", role: "admin", member_code: "123") }
   let!(:building) { Building.create!(name: "Budova A", code: "A1", contact_person_email: "a@b.cz", contact_person_phone: "123", building_created_at: Date.today) }
   let!(:room) { Room.create!(name: "Kancl", code: "101", building: building, room_created_at: Date.today) }
 
