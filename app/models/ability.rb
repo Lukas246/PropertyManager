@@ -8,8 +8,7 @@ class Ability
       can :manage, :all
     elsif user.spravce? # Správce objektu
 
-      can :read, Building, building_assignments: { user_id: user.id }
-      can :update, Building, building_assignments: { user_id: user.id }
+      can :manage, Building, building_assignments: { user_id: user.id }
 
       # To samé pro místnosti a majetek
       can :manage, Room, building: { building_assignments: { user_id: user.id } }

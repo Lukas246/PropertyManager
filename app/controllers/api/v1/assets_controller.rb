@@ -3,13 +3,13 @@ module Api
     class AssetsController < BaseController
       before_action :set_asset, only: [:update, :destroy]
 
-      # a. Endpoint pro výpis majetku (GET /api/v1/inventura)
+      # a. Endpoint pro výpis majetku (GET /api/v1/inventory)
       def index
         @assets = Asset.all
         render json: @assets
       end
 
-      # b. Endpoint pro vytvoření (POST /api/v1/inventura)
+      # b. Endpoint pro vytvoření (POST /api/v1/inventory)
       def create
         @asset = Asset.new(asset_params)
         if @asset.save
@@ -19,7 +19,7 @@ module Api
         end
       end
 
-      # b. Endpoint pro úpravu (PATCH/PUT /api/v1/inventura/:id)
+      # b. Endpoint pro úpravu (PATCH/PUT /api/v1/inventory/:id)
       def update
         if @asset.update(asset_params)
           render json: @asset
@@ -28,7 +28,7 @@ module Api
         end
       end
 
-      # b. Endpoint pro smazání (DELETE /api/v1/inventura/:id)
+      # b. Endpoint pro smazání (DELETE /api/v1/inventory/:id)
       def destroy
         @asset.destroy
         head :no_content

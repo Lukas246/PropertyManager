@@ -40,7 +40,7 @@ class AssetsController < ApplicationController
       @assets = @assets.where(room_id: params[:room_id])
     end
 
-    # Podpora pro CSV export (jak jsme psali minule), aby exportoval i vyfiltrovaná data
+    # Podpora pro CSV export
     respond_to do |format|
       format.html
       format.csv { send_data generate_csv(@assets), filename: "export-majetku-#{Date.today}.csv" }
