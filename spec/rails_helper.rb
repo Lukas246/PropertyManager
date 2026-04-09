@@ -40,6 +40,9 @@ RSpec.configure do |config|
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
   ]
+  config.before(:each) do
+    Rails.cache.clear
+  end
 
 Shoulda::Matchers.configure do |config|
   config.integrate do |with|

@@ -1,7 +1,7 @@
 module Api
   module V1
     class AssetsController < BaseController
-      before_action :set_asset, only: [:update, :destroy]
+      before_action :set_asset, only: [ :update, :destroy ]
 
       # a. Endpoint pro výpis majetku (GET /api/v1/inventory)
       def index
@@ -32,6 +32,14 @@ module Api
       def destroy
         @asset.destroy
         head :no_content
+      end
+
+      def audit_log
+        # Najdeme majetek s kontrolou oprávnění
+        asset = Asset.accessible_by(current_ability).find(params[:id])
+
+        # Získáme log přes službu
+        render json: Assets::AuditLogService.call(asset)
       end
 
       private

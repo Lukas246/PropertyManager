@@ -4,19 +4,7 @@ class BuildingsController < ApplicationController
 
   # GET /buildings or /buildings.json
   def index
-    # Vygenerujeme unikátní klíč pro danou roli a stav databáze
-    # Příklad: "buildings/role-technician/v1-1712415600"
-    cache_key = [
-      "buildings",
-      "role-#{current_user.role}",
-      "v1", # Verze cache (užitečné, když změníte HTML šablonu)
-      Building.maximum(:updated_at).to_i
-    ]
-
-    @buildings = Rails.cache.fetch(cache_key, expires_in: 24.hours) do
-      # Tento dotaz se spustí, jen když klíč v Redisu neexistuje
-      Building.accessible_by(current_ability).to_a
-    end
+    @buildings = Buildings::ListService.call(current_user, current_ability)
   end
 
   # GET /buildings/1 or /buildings/1.json
