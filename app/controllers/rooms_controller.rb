@@ -4,7 +4,17 @@ class RoomsController < ApplicationController
 
   # GET /rooms or /rooms.json
   def index
-    @rooms = Room.accessible_by(current_ability)
+    # Klíč obsahuje entitu, roli a čas poslední změny jakékoli místnosti
+    cache_key = [
+      "rooms",
+      "role-#{current_user.role}",
+      Room.maximum(:updated_at).to_i
+    ]
+
+    @rooms = Rails.cache.fetch(cache_key, expires_in: 24.hours) do
+      # Respektujeme autorizaci přes CanCanCan/Pundit
+      Room.accessible_by(current_ability).to_a
+    end
   end
 
   # GET /rooms/1 or /rooms/1.json

@@ -43,7 +43,23 @@ class AssetsController < ApplicationController
     # Podpora pro CSV export
     respond_to do |format|
       format.html
-      format.csv { send_data generate_csv(@assets), filename: "export-majetku-#{Date.today}.csv" }
+      format.csv do
+        # 1. Zabalíme filtry do čistého hashe (ActiveJob nemá rád složité ActionController parametry)
+        safe_filters = {
+          "query" => params[:query],
+          "room_id" => params[:room_id],
+          "price_from" => params[:price_from],
+          "price_to" => params[:price_to],
+          "purchase_date_from" => params[:purchase_date_from],
+          "purchase_date_to" => params[:purchase_date_to]
+        }
+
+        # 2. Odošleme úlohu na pozadí (perform_later zajistí, že se to nespustí v hlavním vlákně)
+        CsvExportJob.perform_later(current_user.id, safe_filters)
+
+        # 3. Přesměrujeme zpět s upozorněním
+        redirect_to assets_path(request.query_parameters.except(:format)), notice: "Export se zpracovává na pozadí. Jakmile bude hotový, pošleme vám ho na e-mail."
+      end
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_03_125059) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_08_162300) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_03_125059) do
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["updated_at"], name: "index_buildings_on_updated_at"
   end
 
   create_table "rooms", force: :cascade do |t|
@@ -80,6 +81,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_03_125059) do
     t.date "room_created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["building_id"], name: "index_rooms_on_building_id"
+    t.index ["updated_at"], name: "index_rooms_on_updated_at"
   end
 
   create_table "users", force: :cascade do |t|

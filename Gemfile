@@ -21,6 +21,7 @@ gem "devise"
 gem "cancancan"
 gem "paper_trail"
 gem "csv"
+gem "redis"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
@@ -60,15 +61,14 @@ group :development, :test do
 end
 
 group :development, :test do
-  gem 'rspec-rails'
-  gem 'factory_bot_rails'
-  gem 'faker' # Pro generování náhodných jmen/emailů
+  gem "factory_bot_rails"
+  gem "faker" # Pro generování náhodných jmen/emailů
 end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem 'shoulda-matchers'
-  gem 'database_cleaner-active_record'
+  gem "shoulda-matchers"
+  gem "database_cleaner-active_record"
   gem "capybara"
   gem "selenium-webdriver"
 end
