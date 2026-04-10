@@ -1,0 +1,9 @@
+$kind: collection
+name: PropertyManager API
+variables:
+  - key: baseUrl
+    value: ''
+  - key: apiKey
+    value: ''
+  - key: assetId
+    value: ''

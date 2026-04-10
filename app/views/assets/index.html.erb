@@ -1,97 +1,194 @@
 <% content_for :title, "Evidence majetku" %>
 
-<h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px;">
-  📦 Evidence a správa majetku
-</h1>
+<div class="container-fluid py-4">
 
-<%# Filtrační panel %>
-<div style="background: #ffffff; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-  <h4 style="margin-top: 0; color: #555; display: flex; align-items: center; gap: 8px;">
-    🔍 Filtrování dat
-  </h4>
-
-  <%= form_with url: assets_path, method: :get, local: true do |f| %>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-
-      <div>
-        <%= f.label :query, "Hledat (název, kód, poznámka)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.text_field :query, value: params[:query], placeholder: "Zadejte text...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
-      </div>
-
-      <div>
-        <%= f.label :room_id, "Místnost", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.collection_select :room_id, Room.all, :id, :name, { include_blank: "Všechny místnosti", selected: params[:room_id] }, { style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" } %>
-      </div>
-
-      <div>
-        <%= f.label :purchase_date_from, "Nakoupeno od", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.date_field :purchase_date_from, value: params[:purchase_date_from], style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
-      </div>
-
-      <div>
-        <%= f.label :purchase_date_to, "Nakoupeno do", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.date_field :purchase_date_to, value: params[:purchase_date_to], style: "width: 100%; padding: 7px; border: 1px solid #ccc; border-radius: 4px;" %>
-      </div>
-
-      <div>
-        <%= f.label :price_from, "Minimální cena (Kč)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.number_field :price_from, value: params[:price_from], placeholder: "Od...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
-      </div>
-
-      <div>
-        <%= f.label :price_to, "Maximální cena (Kč)", style: "display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;" %>
-        <%= f.number_field :price_to, value: params[:price_to], placeholder: "Do...", style: "width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" %>
-      </div>
-    </div>
-
-    <div style="margin-top: 20px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #eee; padding-top: 15px;">
-      <%# Sjednocený styl pro submit tlačítko %>
-      <%= f.submit "Použít filtry", name: nil, style: "background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center;" %>
-
-      <%# Sjednocený styl pro odkaz (Zrušit) %>
-      <%= link_to "Zrušit vše", assets_path, style: "background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" %>
-
-      <%# Exportní tlačítko %>
-      <%= link_to "📊 Exportovat CSV", assets_path(request.query_parameters.merge(format: :csv)), style: "background: #28a745; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; margin-left: auto; font-weight: bold; font-family: inherit; font-size: 0.9rem; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;" %>
+  <%# Flash zprávy %>
+  <% if notice.present? %>
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+      <%= notice %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
     </div>
   <% end %>
-</div>
 
-<%# Tabulka majetku %>
-<div style="overflow-x: auto; background: white; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-  <table style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-    <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-      <th style="padding: 12px 15px;">Název majetku</th>
-      <th style="padding: 12px 15px;">Kód</th>
-      <th style="padding: 12px 15px;">Umístění</th>
-      <th style="padding: 12px 15px;">Cena</th>
-      <th style="padding: 12px 15px; text-align: right;">Akce</th>
-    </tr>
-    </thead>
-    <tbody id="assets">
-    <% @assets.each do |asset| %>
-      <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 12px 15px; font-weight: 500;"><%= asset.name %></td>
-        <td style="padding: 12px 15px;"><code style="background: #f1f1f1; padding: 2px 4px; border-radius: 3px;"><%= asset.code %></code></td>
-        <td style="padding: 12px 15px; font-size: 0.9rem; color: #666;">
-          <%= asset.room.building.name %> / <%= asset.room.name %>
-        </td>
-        <td style="padding: 12px 15px;"><%= number_to_currency(asset.purchase_price, unit: "Kč", format: "%n %u", precision: 0) %></td>
-        <td style="padding: 12px 15px; text-align: right; white-space: nowrap;">
-          <%= link_to "Detail", asset, style: "color: #007bff; text-decoration: none; margin-right: 10px;" %>
-          <% if can? :update, asset %>
-            <%= link_to 'Upravit', edit_asset_path(asset), style: "color: #ffc107; text-decoration: none;" %>
-          <% end %>
-        </td>
-      </tr>
+  <%# Nadpis a hlavní akce %>
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <h1 class="h3 mb-0 text-dark">📦 Evidence a správa majetku</h1>
+    <% if can? :create, Asset %>
+      <%= link_to new_asset_path, class: "btn btn-primary shadow-sm" do %>
+        <i class="bi bi-plus-lg me-1"></i> Přidat nový majetek
+      <% end %>
     <% end %>
-    </tbody>
-  </table>
-</div>
+  </div>
 
-<div style="margin-top: 25px; text-align: right;">
-  <% if can? :create, Asset %>
-    <%= link_to "➕ Přidat nový majetek", new_asset_path, style: "background: #007bff; color: white; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 6px rgba(0,123,255,0.2);" %>
+  <%# Původní form_with nahradíme tímto: %>
+  <%= search_form_for @q, url: assets_path, method: :get, local: true do |f| %>
+    <div class="row g-3">
+
+      <%# Hledání v názvu NEBO kódu NEBO poznámce (obsahuje text) %>
+      <div class="col-md-4 col-lg-3">
+        <%= f.label :name_or_code_or_description_cont, "Hledat (název nebo kód)", class: "form-label small fw-bold" %>
+        <%= f.search_field :name_or_code_cont, placeholder: "Zadejte text...", class: "form-control" %>
+      </div>
+
+      <%# Přesná shoda ID místnosti %>
+      <div class="col-md-4 col-lg-2">
+        <%= f.label :room_id_eq, "Místnost", class: "form-label small fw-bold" %>
+        <%= f.collection_select :room_id_eq, @available_rooms, :id, :name, { include_blank: "Všechny místnosti" }, { class: "form-select" } %>
+      </div>
+
+      <%# Datum pořízení OD a DO (Greater Than or Equal, Less Than or Equal) %>
+      <div class="col-md-2">
+        <%= f.label :purchase_date_gteq, "Nakoupeno od", class: "form-label small fw-bold" %>
+        <%= f.date_field :purchase_date_gteq, class: "form-control" %>
+      </div>
+
+      <div class="col-md-2">
+        <%= f.label :purchase_date_lteq, "Nakoupeno do", class: "form-label small fw-bold" %>
+        <%= f.date_field :purchase_date_lteq, class: "form-control" %>
+      </div>
+
+      <%# Cena OD a DO (Greater Than or Equal, Less Than or Equal) %>
+      <div class="col-md-2">
+        <%= f.label :purchase_price_gteq, "Min. cena", class: "form-label small fw-bold" %>
+        <%= f.number_field :purchase_price_gteq, placeholder: "Od...", class: "form-control" %>
+      </div>
+
+      <div class="col-md-2">
+        <%= f.label :purchase_price_lteq, "Max. cena", class: "form-label small fw-bold" %>
+        <%= f.number_field :purchase_price_lteq, placeholder: "Do...", class: "form-control" %>
+      </div>
+
+    </div>
+
+    <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
+      <%= f.submit "Použít filtry", class: "btn btn-primary px-4" %>
+      <%= link_to "Zrušit vše", assets_path, class: "btn btn-outline-secondary" %>
+
+      <div class="ms-auto">
+        <%= link_to assets_path(request.query_parameters.merge(format: :csv)), class: "btn btn-success" do %>
+          <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportovat CSV
+        <% end %>
+      </div>
+    </div>
   <% end %>
+
+  <%# Tabulka majetku %>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-muted">
+          <tr>
+            <%# 1. Název (Zarovnáno vlevo) %>
+            <th class="ps-4" style="width: 25%">
+              <%= sort_link(@q, :name, "Název majetku") %>
+            </th>
+
+            <%# 2. Kód (Na střed) %>
+            <th class="text-center">
+              <%= sort_link(@q, :code, "Kód") %>
+            </th>
+
+            <%# 3. Budova (Na střed) %>
+            <th class="text-center">
+              <%= sort_link(@q, :room_building_name, "Budova") %>
+            </th>
+
+            <%# 4. Místnost (Na střed) %>
+            <th class="text-center">
+              <%= sort_link(@q, :room_name, "Místnost") %>
+            </th>
+
+            <%# 5. Cena (Na střed) %>
+            <th class="text-center">
+              <%= sort_link(@q, :purchase_price, "Cena") %>
+            </th>
+
+            <%# 6. Akce (Doprava) %>
+            <th class="text-end pe-4">Akce</th>
+          </tr>
+          </thead>
+
+          <tbody id="assets">
+          <% @assets.each do |asset| %>
+            <tr>
+              <%# 1. Název %>
+              <td class="ps-4 fw-bold text-dark">
+                <%= asset.name %>
+              </td>
+
+              <%# 2. Kód %>
+              <td class="text-center">
+                <code class="text-secondary bg-light px-2 py-1 rounded small"><%= asset.code %></code>
+              </td>
+
+              <%# 3. Budova %>
+              <td class="text-center small text-muted">
+                <% if asset.room&.building %>
+                  <%= link_to asset.room.building.name, building_path(asset.room.building), class: "text-decoration-none fw-bold" %>
+                <% else %>
+                  <span class="text-black-25">-</span>
+                <% end %>
+              </td>
+
+              <%# 4. Místnost %>
+              <td class="text-center small text-muted">
+                <% if asset.room %>
+                  <%= link_to asset.room.name, room_path(asset.room), class: "text-decoration-none text-secondary" %>
+                <% else %>
+                  <span class="text-black-25">-</span>
+                <% end %>
+              </td>
+
+              <%# 5. Cena %>
+              <td class="text-center fw-bold">
+                <%= number_to_currency(asset.purchase_price, unit: "Kč", format: "%n %u", precision: 0) %>
+              </td>
+
+              <%# 6. Akce %>
+              <td class="text-end pe-4 text-nowrap">
+                <div class="d-flex justify-content-end gap-2">
+                  <%= link_to asset_path(asset), class: "btn btn-sm btn-outline-primary", title: "Detail" do %>
+                    <i class="bi bi-eye"></i>
+                  <% end %>
+
+                  <% if can? :update, asset %>
+                    <%= link_to edit_asset_path(asset), class: "btn btn-sm btn-outline-secondary", title: "Upravit" do %>
+                      <i class="bi bi-pencil"></i>
+                    <% end %>
+                  <% end %>
+
+                  <% if can? :destroy, asset %>
+                    <%= button_to asset, method: :delete,
+                                  class: "btn btn-sm btn-outline-danger",
+                                  form: { class: "d-inline", data: { turbo_confirm: "Opravdu smazat #{asset.name}?" } },
+                                  title: "Smazat" do %>
+                      <i class="bi bi-trash"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Patička se stránkováním Kaminari %>
+    <% if @assets.respond_to?(:total_pages) %>
+      <div class="card-footer bg-white border-top py-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+          <div class="text-muted small mb-3 mb-md-0">
+            Zobrazeno <strong><%= @assets.offset_value + 1 %></strong> –
+            <strong><%= @assets.offset_value + @assets.length %></strong> z
+            <strong><%= @assets.total_count %></strong> záznamů
+          </div>
+          <div class="pagination-sm">
+            <%= paginate @assets %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 </div>

@@ -1,16 +1,77 @@
-<p style="color: green"><%= notice %></p>
+<div class="container-fluid py-4">
 
-<% content_for :title, "Buildings" %>
+  <%# Hlavička stránky %>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Seznam budov</h1>
+    <%= link_to "Přidat novou budovu", new_building_path, class: "btn btn-primary shadow-sm" %>
+  </div>
 
-<h1>Buildings</h1>
+  <%# Karta s tabulkou %>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
 
-<div id="buildings">
-  <% @buildings.each do |building| %>
-    <%= render building %>
-    <p>
-      <%= link_to "Show this building", building %>
-    </p>
-  <% end %>
+          <thead class="table-light text-muted">
+          <tr>
+            <th class="ps-4">Název budovy</th>
+            <th>Kód</th>
+            <th>Adresa</th>
+            <th>Přidáno</th>
+            <th class="text-end pe-4">Akce</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <% if @buildings.any? %>
+            <% @buildings.each do |building| %>
+              <tr>
+                <td class="ps-4 fw-bold text-dark">
+                  <%= building.name %>
+                </td>
+                <td>
+                  <span class="text-secondary font-monospace bg-light px-2 py-1 rounded"><%= building.code %></span>
+                </td>
+                <td>
+                  <%= building.address.presence || '<span class="text-black-50 fst-italic">Nevyplněno</span>'.html_safe %>
+                </td>
+                <td>
+                  <%= building.building_created_at&.strftime("%d. %m. %Y") %>
+                </td>
+                <td class="text-end pe-4">
+
+                  <%# d-flex gap-2 zajistí, že tlačítka budou mít mezi sebou hezké mezery %>
+                  <div class="d-flex justify-content-end gap-2">
+                    <%= link_to "Detail", building_path(building), class: "btn btn-sm btn-outline-primary" %>
+                    <%= link_to "Upravit", edit_building_path(building), class: "btn btn-sm btn-outline-secondary" %>
+
+                    <%# Tlačítko pro smazání s potvrzením přes Hotwire (Turbo) %>
+                    <%= button_to "Smazat", building,
+                                  method: :delete,
+                                  class: "btn btn-sm btn-outline-danger",
+                                  form: {
+                                    class: "d-inline",
+                                    data: { turbo_confirm: "Opravdu chcete budovu '#{building.name}' nenávratně smazat? Smažou se tím i všechny její místnosti." }
+                                  }
+                    %>
+                  </div>
+
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <%# Prázdný stav %>
+            <tr>
+              <td colspan="5" class="text-center text-muted py-5 border-0">
+                <i class="bi bi-building fs-1 d-block mb-2"></i>
+                Zatím nemáte v systému žádné budovy.
+              </td>
+            </tr>
+          <% end %>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
-
-<%= link_to "New building", new_building_path %>

@@ -1,0 +1,31 @@
+$kind: http-request
+name: Create Asset - Missing Required Fields (Validation)
+method: POST
+url: '{{baseUrl}}/api/v1/inventory'
+order: 6000
+headers:
+  - key: X-Api-Key
+    value: '{{apiKey}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "asset": {
+        "note": "Missing required fields"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 422 Unprocessable Entity", function () {
+          pm.response.to.have.status(422);
+      });
+
+      pm.test("Response contains errors array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("errors");
+          pm.expect(json.errors).to.be.an("array").that.is.not.empty;
+      });

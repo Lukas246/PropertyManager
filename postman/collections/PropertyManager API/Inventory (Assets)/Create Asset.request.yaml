@@ -1,0 +1,48 @@
+$kind: http-request
+name: Create Asset
+method: POST
+url: '{{baseUrl}}/api/v1/inventory'
+order: 2000
+headers:
+  - key: X-Api-Key
+    value: '{{apiKey}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "asset": {
+        "name": "Test Laptop",
+        "code": "LAP-001",
+        "room_id": 1,
+        "purchase_date": "2024-01-15",
+        "last_inspection_date": "2025-01-15",
+        "purchase_price": 1200.00,
+        "note": "Created via Postman test"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Response contains asset with correct name", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("name", "Test Laptop");
+          pm.expect(json).to.have.property("code", "LAP-001");
+      });
+
+      pm.test("Response contains an id", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          // Save the created asset ID for use in subsequent requests
+          pm.collectionVariables.set("assetId", json.id);
+      });
+
+      pm.test("Response time is under 1000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });

@@ -6,6 +6,14 @@ class Building < ApplicationRecord
   validates :name, :code, :contact_person_email, :contact_person_phone, :building_created_at, presence: true
   validates :code, uniqueness: true
 
+  def self.ransackable_attributes(auth_object = nil)
+    ["name", "code"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    ["rooms"]
+  end
+
   private
   def touch_all_buildings
     Rails.cache.delete_matched("buildings/role-*")

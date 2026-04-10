@@ -1,0 +1,12 @@
+$kind: http-request
+name: List Rooms - Unauthorized
+method: GET
+url: '{{baseUrl}}/api/v1/rooms'
+order: 2000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 401 Unauthorized", function () {
+          pm.response.to.have.status(401);
+      });

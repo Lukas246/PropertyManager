@@ -1,8 +1,7 @@
 <%= form_with(model: room) do |form| %>
   <% if room.errors.any? %>
     <div style="color: red">
-      <h2><%= pluralize(room.errors.count, "error") %> prohibited this room from being saved:</h2>
-
+      <h2><%= pluralize(room.errors.count, "chyba", "chyby", "chyb") %> zabránily uložení místnosti:</h2>
       <ul>
         <% room.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -12,26 +11,37 @@
   <% end %>
 
   <div>
-    <%= form.label :name, style: "display: block" %>
+    <%= form.label :name, "Název místnosti", style: "display: block" %>
     <%= form.text_field :name %>
   </div>
 
   <div>
-    <%= form.label :code, style: "display: block" %>
+    <%= form.label :code, "Kód místnosti", style: "display: block" %>
     <%= form.text_field :code %>
   </div>
 
   <div>
-    <%= form.label :building_id, style: "display: block" %>
-    <%= form.text_field :building_id %>
+    <%= form.label :building_id, "Budova", style: "display: block" %>
+
+    <%# KOUZLO S VÝBĚREM BUDOVY %>
+    <% if local_assigns[:building] %>
+      <%# Jsme na detailu budovy: Zobrazíme jen text a ID pošleme skrytě %>
+      <div style="padding: 4px 8px; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; display: inline-block;">
+        <strong><%= building.name %></strong>
+      </div>
+      <%= form.hidden_field :building_id, value: building.id %>
+    <% else %>
+      <%# Jsme na obecné stránce /rooms/new: Zobrazíme roletku s výběrem %>
+      <%= form.collection_select :building_id, Building.accessible_by(current_ability), :id, :name, { prompt: "--- Vyberte budovu ---" } %>
+    <% end %>
   </div>
 
   <div>
-    <%= form.label :room_created_at, style: "display: block" %>
+    <%= form.label :room_created_at, "Datum vytvoření", style: "display: block" %>
     <%= form.date_field :room_created_at %>
   </div>
 
-  <div>
-    <%= form.submit %>
+  <div style="margin-top: 15px;">
+    <%= form.submit "Uložit místnost" %>
   </div>
 <% end %>

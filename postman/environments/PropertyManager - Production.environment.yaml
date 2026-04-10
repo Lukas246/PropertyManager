@@ -1,0 +1,10 @@
+name: PropertyManager - Production
+values:
+  - key: baseUrl
+    value: 'https://your-production-domain.com'
+    enabled: true
+    type: default
+  - key: apiKey
+    value: ''
+    enabled: true
+    type: default

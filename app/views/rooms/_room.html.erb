@@ -1,22 +1,16 @@
-<div id="<%= dom_id room %>">
-  <div>
-    <strong>Name:</strong>
+<%# app/views/rooms/_room.html.erb %>
+<%# Musí to být <tr> (table row), jinak se tabulka rozsype! %>
+<tr id="<%= dom_id(room) %>">
+  <td class="ps-4 fw-bold text-dark align-middle">
     <%= room.name %>
-  </div>
-
-  <div>
-    <strong>Code:</strong>
-    <%= room.code %>
-  </div>
-
-  <div>
-    <strong>Building:</strong>
-    <%= room.building_id %>
-  </div>
-
-  <div>
-    <strong>Room created at:</strong>
-    <%= room.room_created_at %>
-  </div>
-
-</div>
+  </td>
+  <td class="align-middle">
+    <span class="text-secondary font-monospace bg-light px-2 py-1 rounded"><%= room.code %></span>
+  </td>
+  <td class="align-middle">
+    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Aktivní</span>
+  </td>
+  <td class="text-end pe-4 align-middle">
+    <%= link_to "Detail", room_path(room), class: "btn btn-sm btn-outline-secondary" %>
+  </td>
+</tr>

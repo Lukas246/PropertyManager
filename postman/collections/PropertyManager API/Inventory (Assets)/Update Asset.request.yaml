@@ -1,0 +1,35 @@
+$kind: http-request
+name: Update Asset
+method: PATCH
+url: '{{baseUrl}}/api/v1/inventory/{{assetId}}'
+order: 3000
+headers:
+  - key: X-Api-Key
+    value: '{{apiKey}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "asset": {
+        "name": "Updated Laptop",
+        "note": "Updated via Postman test"
+      }
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Asset name was updated", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("name", "Updated Laptop");
+      });
+
+      pm.test("Response time is under 1000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });

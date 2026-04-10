@@ -1,4 +1,4 @@
-require 'csv'
+require "csv"
 
 class CsvExportJob < ApplicationJob
   queue_as :default
@@ -16,12 +16,12 @@ class CsvExportJob < ApplicationJob
     end
 
     # Aplikace samotných filtrů
-    assets = assets.where("name LIKE ? OR code LIKE ?", "%#{filters['query']}%", "%#{filters['query']}%") if filters['query'].present?
-    assets = assets.where(room_id: filters['room_id']) if filters['room_id'].present?
-    assets = assets.where("purchase_price >= ?", filters['price_from']) if filters['price_from'].present?
-    assets = assets.where("purchase_price <= ?", filters['price_to']) if filters['price_to'].present?
-    assets = assets.where("purchase_date >= ?", filters['purchase_date_from']) if filters['purchase_date_from'].present?
-    assets = assets.where("purchase_date <= ?", filters['purchase_date_to']) if filters['purchase_date_to'].present?
+    assets = assets.where("name LIKE ? OR code LIKE ?", "%#{filters['query']}%", "%#{filters['query']}%") if filters["query"].present?
+    assets = assets.where(room_id: filters["room_id"]) if filters["room_id"].present?
+    assets = assets.where("purchase_price >= ?", filters["price_from"]) if filters["price_from"].present?
+    assets = assets.where("purchase_price <= ?", filters["price_to"]) if filters["price_to"].present?
+    assets = assets.where("purchase_date >= ?", filters["purchase_date_from"]) if filters["purchase_date_from"].present?
+    assets = assets.where("purchase_date <= ?", filters["purchase_date_to"]) if filters["purchase_date_to"].present?
 
     # 2. Vygenerujeme CSV
     csv_string = generate_csv(assets)

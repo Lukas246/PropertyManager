@@ -4,6 +4,8 @@ class AssetsController < ApplicationController
 
   # GET /assets or /assets.json
   def index
+    @q = Asset.accessible_by(current_ability).ransack(params[:q])
+
     if current_user.role == "admin"
       @assets = Asset.all
     elsif current_user.role == "spravce"
@@ -61,6 +63,8 @@ class AssetsController < ApplicationController
         redirect_to assets_path(request.query_parameters.except(:format)), notice: "Export se zpracovává na pozadí. Jakmile bude hotový, pošleme vám ho na e-mail."
       end
     end
+    @assets = @q.result(distinct: true).page(params[:page]).per(15)
+    @available_rooms = Room.accessible_by(current_ability).order(:name)
   end
 
   # GET /assets/1 or /assets/1.json

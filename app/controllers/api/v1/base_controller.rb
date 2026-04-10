@@ -3,6 +3,14 @@ module Api
     class BaseController < ActionController::API
       before_action :authenticate_user!
 
+      def current_user
+        @current_user
+      end
+
+      def current_ability
+        @current_ability ||= Ability.new(current_user)
+      end
+
       private
 
       def authenticate_user!

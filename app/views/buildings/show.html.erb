@@ -1,10 +1,102 @@
-<p style="color: green"><%= notice %></p>
+<div class="container-fluid py-4">
 
-<%= render @building %>
+  <%# 1. Flash zprávy (ideálně později přesunout do app/views/layouts/application.html.erb) %>
+  <% if notice.present? %>
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+      <%= notice %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+    </div>
+  <% end %>
 
-<div>
-  <%= link_to "Edit this building", edit_building_path(@building) %> |
-  <%= link_to "Back to buildings", buildings_path %>
+  <%# 2. Hlavička s navigací a akcemi %>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <%= link_to buildings_path, class: "text-decoration-none text-muted mb-2 d-inline-block" do %>
+        &larr; Zpět na seznam budov
+      <% end %>
+      <h1 class="h2 mb-0">Detail budovy</h1>
+    </div>
+    <div class="d-flex gap-2">
+      <%= link_to "Upravit", edit_building_path(@building), class: "btn btn-outline-secondary" %>
+      <%= button_to "Smazat", @building, method: :delete, class: "btn btn-outline-danger", form: { data: { turbo_confirm: "Opravdu chcete tuto budovu smazat?" } } %>
+    </div>
+  </div>
 
-  <%= button_to "Destroy this building", @building, method: :delete %>
+  <%# 3. Informace o budově (vaše stávající partial šablona) %>
+  <div class="card shadow-sm border-0 mb-5">
+    <div class="card-body">
+      <%= render @building %>
+    </div>
+  </div>
+
+  <%# 4. Rozdělení na dva sloupce pro Místnosti a Formulář %>
+  <div class="row g-4">
+
+    <%# Levý sloupec: Seznam místností %>
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+          <h3 class="h5 mb-0 text-secondary">Místnosti v budově</h3>
+        </div>
+
+        <div class="card-body">
+          <%# Levý sloupec: Seznam místností (jako tabulka) %>
+          <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+                <h3 class="h5 mb-0 text-secondary">Místnosti v budově</h3>
+              </div>
+
+              <%# p-0 odstraní padding z karty, aby tabulka sahala hezky od kraje ke kraji %>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted">
+                    <tr>
+                      <th class="ps-4">Název</th>
+                      <th>Kód</th>
+                      <th>Stav</th>
+                      <th class="text-end pe-4">Akce</th>
+                    </tr>
+                    </thead>
+
+                    <%# Tady je cíl pro náš Turbo Stream! %>
+                    <tbody id="rooms_list">
+                    <% if @building.rooms.any? %>
+                      <%= render @building.rooms %>
+                    <% else %>
+                      <%# Prázdný stav jako jeden řádek tabulky %>
+                      <tr id="rooms_empty_state">
+                        <td colspan="4" class="text-center text-muted py-5 border-0">
+                          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                          Zatím zde nejsou žádné místnosti.
+                        </td>
+                      </tr>
+                    <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Pravý sloupec: Formulář pro přidání %>
+    <div class="col-lg-4">
+      <%# 'position-sticky' udrží formulář na obrazovce i když uživatel scroluje dlouhým seznamem místností %>
+      <div class="position-sticky" style="top: 2rem;">
+        <%= turbo_frame_tag "new_room_form" do %>
+          <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body p-4">
+              <h3 class="h5 mb-4 text-primary">Přidat novou místnost</h3>
+              <%= render "rooms/form", building: @building, room: Room.new %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
 </div>

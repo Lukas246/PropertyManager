@@ -1,0 +1,12 @@
+<%# 1. Přidej novou místnost na začátek seznamu %>
+<%= turbo_stream.prepend "rooms_list" do %>
+  <%= render @room %>
+<% end %>
+
+<%# 2. Vymaž formulář (vyresetuj ho) %>
+<%= turbo_stream.replace "new_room_form" do %>
+  <%= turbo_frame_tag "new_room_form" do %>
+    <h3>Přidat novou místnost</h3>
+    <%= render "rooms/form", building: @building, room: Room.new %>
+  <% end %>
+<% end %>
