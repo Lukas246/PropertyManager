@@ -1,16 +1,105 @@
-<p style="color: green"><%= notice %></p>
+<div class="container-fluid py-4">
 
-<% content_for :title, "Users" %>
+  <%# Hlavička %>
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <h1 class="h3 mb-0 text-dark"><i class="bi bi-people me-2"></i>Správa uživatelů</h1>
+    <%= link_to new_user_path, class: "btn btn-primary shadow-sm" do %>
+      <i class="bi bi-person-plus me-1"></i> Nový uživatel
+    <% end %>
+  </div>
 
-<h1>Users</h1>
+  <%# Jednoduchý filtr (Ransack) %>
+  <div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+      <%= search_form_for @q, url: users_path, class: "row g-3 align-items-end" do |f| %>
+        <div class="col-md-6">
+          <%= f.label :email_or_full_name_cont, "Hledat uživatele (Email, Jméno)", class: "form-label small fw-bold" %>
+          <%= f.search_field :email_or_full_name_cont, class: "form-control", placeholder: "např. admin@firma.cz..." %>
+        </div>
+        <div class="col-md-3">
+          <%= f.submit "Hledat", class: "btn btn-secondary w-100" %>
+        </div>
+        <div class="col-md-3 text-end">
+          <%= link_to "Zrušit", users_path, class: "btn btn-link text-decoration-none text-muted" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 
-<div id="users">
-  <% @users.each do |user| %>
-    <%= render user %>
-    <p>
-      <%= link_to "Show this user", user %>
-    </p>
-  <% end %>
+  <%# Tabulka uživatelů %>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light text-muted">
+          <tr>
+            <th class="ps-4"><%= sort_link(@q, :full_name, "Jméno") %></th>
+            <th><%= sort_link(@q, :email, "Email") %></th>
+            <th class="text-center">Role</th>
+            <th class="text-center">API Klíč</th>
+            <th class="text-center">Naposledy online</th>
+            <th class="text-end pe-4">Akce</th>
+          </tr>
+          </thead>
+          <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td class="ps-4 fw-bold text-dark">
+                <%= user.full_name %>
+              </td>
+              <td><%= user.email %></td>
+              <td class="text-center">
+                <%# Barevné odlišení rolí %>
+                <% badge_class = user.role == 'admin' ? 'bg-danger' : 'bg-info text-dark' %>
+                <span class="badge <%= badge_class %> rounded-pill px-3 py-2">
+                  <%= user.role.upcase %>
+                </span>
+              </td>
+              <td class="text-center">
+                <small class="font-monospace text-muted">
+                  <% if user.api_key.present? %>
+                    <%= user.api_key.truncate(10) %>...
+                  <% else %>
+                    <span class="text-black-25">—</span>
+                  <% end %>
+                </small>
+              </td>
+              <td class="text-center small text-muted">
+                <%= user.current_sign_in_at&.strftime("%d.%m.%Y %H:%M") || "Nikdy" %>
+              </td>
+              <td class="text-end pe-4">
+                <div class="d-flex justify-content-end gap-2">
+                  <%= link_to edit_user_path(user), class: "btn btn-sm btn-outline-secondary", title: "Upravit" do %>
+                    <i class="bi bi-pencil"></i>
+                  <% end %>
+
+                  <%# Admin nemůže smazat sám sebe %>
+                  <% unless user == current_user %>
+                    <%= button_to user, method: :delete,
+                                  class: "btn btn-sm btn-outline-danger",
+                                  form: { class: "d-inline", data: { turbo_confirm: "Opravdu smazat uživatele #{user.full_name}?" } } do %>
+                      <i class="bi bi-trash"></i>
+                    <% end %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%# Patička se stránkováním %>
+    <div class="card-footer bg-white border-top py-3">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="text-muted small">
+          Celkem uživatelů: <strong><%= @users.total_count %></strong>
+        </div>
+        <div class="pagination-sm">
+          <%= paginate @users %>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-<%= link_to "New user", new_user_path %>

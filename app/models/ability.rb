@@ -14,7 +14,7 @@ class Ability
       can :manage, Room, building: { building_assignments: { user_id: user.id } }
       can :manage, Asset, room: { building: { building_assignments: { user_id: user.id } } }
     elsif user.ctenar? # Čtenář
-      can :read, :all
+      can :read, Asset
     end
   end
 end

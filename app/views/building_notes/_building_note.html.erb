@@ -1,0 +1,21 @@
+<div class="d-flex mb-3">
+  <%# Ikonka nebo iniciály uživatele %>
+  <div class="flex-shrink-0 mt-1">
+    <div class="bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center border" style="width: 35px; height: 35px; font-weight: bold;">
+      <%= building_note.user.full_name.first %>
+    </div>
+  </div>
+
+  <%# Tělo zprávy %>
+  <div class="flex-grow-1 ms-3">
+    <div class="bg-light p-2 rounded-3 d-inline-block">
+      <div class="small fw-bold text-dark mb-1">
+        <%= building_note.user.full_name %>
+        <span class="text-muted fw-normal ms-2" style="font-size: 0.75rem;"><%= building_note.created_at.strftime("%H:%M") %></span>
+      </div>
+      <p class="mb-0 text-secondary" style="font-size: 0.9rem;">
+        <%= building_note.body %>
+      </p>
+    </div>
+  </div>
+</div>

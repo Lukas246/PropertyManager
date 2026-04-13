@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
   devise_for :users
   # 1. Cesty pro webový prohlížeč (HTML)
-  resources :buildings
+  resources :buildings do
+    resources :building_notes, only: [ :create ]
+  end
   resources :rooms
   resources :assets, path: "inventory"
   resources :users

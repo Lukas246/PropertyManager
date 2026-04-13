@@ -1,6 +1,11 @@
 # db/seeds.rb
 
-puts "--- Čistím databázi ---"
+require 'faker'
+
+# Nastavíme Faker na češtinu, ať máme reálná česká jména a adresy
+Faker::Config.locale = 'cs'
+
+puts "🧹 --- Čistím databázi ---"
 # Mažeme v opačném pořadí závislostí
 BuildingAssignment.destroy_all
 Asset.destroy_all
@@ -8,71 +13,118 @@ Room.destroy_all
 Building.destroy_all
 User.destroy_all
 
-puts "--- Vytvářím uživatele ---"
+puts "👤 --- Vytvářím uživatele ---"
+# 1. Pevně daný Admin (přesně jak jste chtěl)
 admin = User.create!(
   full_name: "Hlavní Administrátor",
   email: "admin@seznam.cz",
   password: "password123",
   password_confirmation: "password123",
   role: :admin,
-  member_code: "ADM001"
+  member_code: "ADM-001"
 )
+puts "  ✅ Hlavní admin vytvořen."
 
-spravce_a = User.create!(
-  full_name: "Jan Správce (Budova A)",
-  email: "spravce.a@seznam.cz",
-  password: "password123",
-  password_confirmation: "password123",
-  role: :spravce,
-  member_code: "SPR001"
-)
+# 2. Vytvoříme 3 Správce pomocí Fakera
+managers = []
+3.times do |i|
+  managers << User.create!(
+    full_name: Faker::Name.name,
+    email: "spravce#{i + 1}@seznam.cz", # Můžete se přihlásit jako spravce1@seznam.cz atd.
+    password: "password123",
+    password_confirmation: "password123",
+    role: :spravce,
+    member_code: "SPR-#{Faker::Alphanumeric.alphanumeric(number: 5).upcase}"
+  )
+end
+puts "  ✅ #{managers.count} správců vytvořeno."
 
-puts "--- Vytvářím budovy ---"
-# Tady jsem přidal pole, která tvoje validace vyžadovala
-b_praha = Building.create!(
-  name: "Centrála Praha",
-  code: "PRG-01",
-  address: "Václavské nám. 1",
-  contact_person_email: "praha@firma.cz",      # DOPLNĚNO
-  contact_person_phone: "+420 111 222 333",    # DOPLNĚNO
-  building_created_at: Time.current             # DOPLNĚNO
-)
+# 3. Vytvoříme 10 běžných uživatelů
+users = []
+10.times do
+  users << User.create!(
+    full_name: Faker::Name.name,
+    email: Faker::Internet.unique.email,
+    password: "password123",
+    password_confirmation: "password123",
+    role: :ctenar,
+    member_code: "USR-#{Faker::Alphanumeric.alphanumeric(number: 5).upcase}"
+  )
+end
+puts "  ✅ #{users.count} běžných uživatelů vytvořeno."
 
-b_brno = Building.create!(
-  name: "Pobočka Brno",
-  code: "BRN-02",
-  address: "Svobody 10",
-  contact_person_email: "brno@firma.cz",       # DOPLNĚNO
-  contact_person_phone: "+420 444 555 666",    # DOPLNĚNO
-  building_created_at: Time.current             # DOPLNĚNO
-)
 
-puts "--- Vytvářím místnosti ---"
-r1 = Room.create!(name: "IT Oddělení", code: "101", building: b_praha, room_created_at: 1.year.ago)
-r2 = Room.create!(name: "Zasedačka", code: "202", building: b_praha, room_created_at: 2.years.ago)
-r3 = Room.create!(name: "Sklad Brno", code: "S01", building: b_brno, room_created_at: 1.year.ago)
+puts "🏢 --- Vytvářím budovy ---"
+buildings = []
+8.times do |i|
+  buildings << Building.create!(
+    name: "#{Faker::Company.name} - #{Faker::Address.city}",
+    code: "BLD-#{100 + i}",
+    address: Faker::Address.full_address,
+    contact_person_email: Faker::Internet.email,
+    contact_person_phone: Faker::PhoneNumber.phone_number,
+    building_created_at: Faker::Time.backward(days: 1000)
+  )
+end
+puts "  ✅ #{buildings.count} budov vytvořeno."
 
-puts "--- Přiřazuji správce k budově ---"
-BuildingAssignment.create!(user: spravce_a, building: b_praha)
 
-puts "--- Vytvářím ukázkový majetek ---"
-Asset.create!(
-  name: "MacBook Pro 14",
-  code: "INV-2026-001",
-  room: r1,
-  purchase_date: 1.year.ago,
-  last_inspection_date: 1.month.ago,
-  purchase_price: 55000,
-  note: "Hlavní pracovní stroj"
-)
+puts "🔑 --- Přiřazuji správce k budovám ---"
+# Každá budova dostane náhodně jednoho z našich 3 správců
+buildings.each do |building|
+  BuildingAssignment.create!(
+    user: managers.sample,
+    building: building
+  )
+end
+puts "  ✅ Správci byli přiřazeni k budovám."
 
-Asset.create!(
-  name: "Kancelářská židle Herman Miller",
-  code: "INV-2026-002",
-  room: r2,
-  purchase_date: 2.years.ago,
-  last_inspection_date: 6.months.ago,
-  purchase_price: 35000
-)
 
-puts "--- Hotovo! Seeds byly úspěšně nahrány. ---"
+puts "🚪 --- Vytvářím místnosti ---"
+room_types = ["Kancelář", "Zasedačka", "Sklad", "Kuchyňka", "IT oddělení", "Serverovna", "Recepce"]
+rooms = []
+
+buildings.each do |building|
+  # Každá budova bude mít 3 až 8 místností
+  rand(3..8).times do |i|
+    rooms << Room.create!(
+      name: "#{room_types.sample} #{i + 1}",
+      code: "#{building.code.split('-').last}-#{100 + i}",
+      building: building,
+      room_created_at: Faker::Time.backward(days: 500)
+    )
+  end
+end
+puts "  ✅ #{rooms.count} místností rozděleno do budov."
+
+
+puts "📦 --- Vytvářím ukázkový majetek ---"
+asset_names = [
+  "MacBook Pro 14", "Dell XPS 15", "Monitor Dell 27", "Monitor HP 24",
+  "Kancelářská židle Herman Miller", "Kancelářská židle Ikea Markus",
+  "Stůl polohovací", "Tiskárna HP LaserJet", "Projektor Epson",
+  "Skartovačka Fellowes", "Kávovar DeLonghi", "Klimatizace mobilní"
+]
+
+assets_created = 0
+
+rooms.each do |room|
+  # Každá místnost dostane náhodně 2 až 12 kusů majetku
+  rand(2..12).times do
+    Asset.create!(
+      name: asset_names.sample,
+      code: "INV-#{Time.now.year}-#{Faker::Alphanumeric.alphanumeric(number: 6).upcase}",
+      room: room,
+      purchase_date: Faker::Date.backward(days: 1500),
+      # Někdy majetek má revizi, někdy je nil (pro otestování warningů ve view)
+      last_inspection_date: [Faker::Date.backward(days: 400)].sample,
+      purchase_price: Faker::Commerce.price(range: 1500..65000),
+      # Poznámku přidáme jen u zhruba 30 % majetku
+      note: [Faker::Lorem.sentence, "", ""].sample
+    )
+    assets_created += 1
+  end
+end
+puts "  ✅ #{assets_created} kusů majetku rozmístěno do místností."
+
+puts "🎉 --- Hotovo! Seeds byly úspěšně nahrány. --- 🎉"
