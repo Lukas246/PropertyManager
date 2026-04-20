@@ -4,10 +4,10 @@ class Room < ApplicationRecord
   validates :name, :code, :building_id, :room_created_at, presence: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["name", "code", "building_id"]
+    %w[name code building_id room_created_at]
   end
 
   def self.ransackable_associations(auth_object = nil)
-    ["building", "assets"]
+    %w[building assets]
   end
 end

@@ -1,47 +1,90 @@
-<%= form_with(model: room) do |form| %>
+<%= form_with(model: room, class: "needs-validation") do |f| %>
   <% if room.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(room.errors.count, "chyba", "chyby", "chyb") %> zabránily uložení místnosti:</h2>
-      <ul>
-        <% room.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+    <div class="alert alert-danger border-0 shadow-sm mb-4">
+      <div class="d-flex">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i>
+        <div>
+          <h5 class="alert-heading h6 fw-bold">Chyba při ukládání:</h5>
+          <ul class="mb-0 small text-opacity-75">
+            <% room.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :name, "Název místnosti", style: "display: block" %>
-    <%= form.text_field :name %>
-  </div>
+  <div class="row g-3">
+    <%# 1. Název a Kód %>
+    <div class="col-md-8">
+      <%= f.label :name, "Název místnosti", class: "form-label fw-semibold small text-muted" %>
+      <%= f.text_field :name, class: "form-control rounded-3 py-2", placeholder: "např. Zasedačka v patře" %>
+    </div>
 
-  <div>
-    <%= form.label :code, "Kód místnosti", style: "display: block" %>
-    <%= form.text_field :code %>
-  </div>
+    <div class="col-md-4">
+      <%= f.label :code, "Kód", class: "form-label fw-semibold small text-muted" %>
+      <%= f.text_field :code, class: "form-control rounded-3 py-2", placeholder: "101" %>
+    </div>
 
-  <div>
-    <%= form.label :building_id, "Budova", style: "display: block" %>
+    <%# 2. Výběr budovy přes náš Custom Stimulus Controller %>
+    <div class="col-12 mt-3"
+         data-controller="custom-dropdown"
+         data-action="click@window->custom-dropdown#hide">
 
-    <%# KOUZLO S VÝBĚREM BUDOVY %>
-    <% if local_assigns[:building] %>
-      <%# Jsme na detailu budovy: Zobrazíme jen text a ID pošleme skrytě %>
-      <div style="padding: 4px 8px; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; display: inline-block;">
-        <strong><%= building.name %></strong>
+      <%= f.label :building_id, "Budova", class: "form-label fw-semibold small text-muted" %>
+
+      <div class="dropdown position-relative">
+        <%# Skryté pole, kam Stimulus zapisuje ID vybrané budovy %>
+        <%= f.hidden_field :building_id, data: { "custom-dropdown-target": "input" } %>
+
+        <button type="button"
+                class="form-select text-start d-flex justify-content-between align-items-center py-2"
+                data-action="custom-dropdown#toggle">
+          <span data-custom-dropdown-target="label" class="text-truncate">
+            <%= room.building&.name || "Vyberte budovu..." %>
+          </span>
+        </button>
+
+        <%# Přidali jsme 'pb-2' do tříd a 'overflow-y: scroll' pro jistotu stabilního scrollbaru %>
+        <div data-custom-dropdown-target="menu"
+             class="d-none position-absolute z-3 w-100 bg-white border rounded-3 shadow-lg mt-1 pb-2"
+             style="max-height: 300px; overflow-y: auto; overflow-x: hidden;">
+
+          <% @buildings.each_with_index do |building, index| %>
+            <button type="button"
+                    <%# Přidáme podmínku, aby poslední položka neměla border-bottom %>
+                    class="dropdown-item py-2 px-3 d-flex flex-column text-start <%= 'border-bottom border-light' unless index == @buildings.size - 1 %>"
+                    data-action="click->custom-dropdown#select"
+                    data-id="<%= building.id %>"
+                    data-name="<%= building.name %>">
+              <span class="fw-bold text-dark"><%= building.name %></span>
+              <small class="text-muted"><%= building.address %></small>
+            </button>
+          <% end %>
+        </div>
       </div>
-      <%= form.hidden_field :building_id, value: building.id %>
-    <% else %>
-      <%# Jsme na obecné stránce /rooms/new: Zobrazíme roletku s výběrem %>
-      <%= form.collection_select :building_id, Building.accessible_by(current_ability), :id, :name, { prompt: "--- Vyberte budovu ---" } %>
-    <% end %>
-  </div>
+    </div>
 
-  <div>
-    <%= form.label :room_created_at, "Datum vytvoření", style: "display: block" %>
-    <%= form.date_field :room_created_at %>
-  </div>
+    <%# 3. Datum založení %>
+    <div class="col-md-6 mt-3">
+      <%= f.label :room_created_at, "Datum založení / otevření", class: "form-label fw-semibold small text-muted" %>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted">
+          <i class="bi bi-calendar3"></i>
+        </span>
+        <%= f.date_field :room_created_at, class: "form-control border-start-0 rounded-end-3 py-2" %>
+      </div>
+    </div>
 
-  <div style="margin-top: 15px;">
-    <%= form.submit "Uložit místnost" %>
+    <%# Tlačítka akce %>
+    <div class="col-12 mt-5">
+      <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end">
+        <%= f.button type: "submit", class: "btn btn-primary px-5 rounded-3 order-1 order-md-2" do %>
+          Vytvořit místnost <i class="bi bi-chevron-right ms-1 small"></i>
+        <% end %>
+        <%= link_to "Zpět", rooms_path, class: "btn btn-light px-4 rounded-3 order-2 order-md-1" %>
+      </div>
+    </div>
   </div>
 <% end %>

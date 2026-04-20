@@ -1,11 +1,44 @@
-<% content_for :title, "New building" %>
+<% content_for :title, "Nová budova | PropertyManager" %>
 
-<h1>New building</h1>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
 
-<%= render "form", building: @building %>
+      <%# Breadcrumbs / Navigace %>
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Budovy", buildings_path, class: "text-decoration-none" %></li>
+          <li class="breadcrumb-item active" aria-current="page">Nová budova</li>
+        </ol>
+      </nav>
 
-<br>
+      <%# Hlavní karta s formulářem %>
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-4 border-bottom-0">
+          <div class="d-flex align-items-center">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3 text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <i class="bi bi-building-add fs-4"></i>
+            </div>
+            <div>
+              <h1 class="h4 mb-0 fw-bold">Přidat novou budovu</h1>
+              <p class="text-muted small mb-0">Zadejte základní parametry a kontaktní údaje.</p>
+            </div>
+          </div>
+        </div>
 
-<div>
-  <%= link_to "Back to buildings", buildings_path %>
+        <div class="card-body px-4 pt-2 pb-4">
+          <hr class="mt-0 mb-4 opacity-10">
+
+          <%= render "form", building: @building %>
+        </div>
+
+        <div class="card-footer bg-light border-top-0 py-3 text-center">
+          <%= link_to buildings_path, class: "btn btn-link btn-sm text-decoration-none text-muted" do %>
+            <i class="bi bi-arrow-left me-1"></i> Zpět na přehled budov
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>

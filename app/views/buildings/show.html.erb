@@ -35,15 +35,9 @@
     <%# Levý sloupec: Seznam místností %>
     <div class="col-lg-8">
       <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-          <h3 class="h5 mb-0 text-secondary">Místnosti v budově</h3>
-        </div>
-
         <div class="card-body">
           <%# Levý sloupec: Seznam místností (jako tabulka) %>
-          <div class="col-lg-8">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+
                 <h3 class="h5 mb-0 text-secondary">Místnosti v budově</h3>
               </div>
 
@@ -79,17 +73,17 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+
 
     <%# Pravý sloupec: Formulář pro přidání %>
     <div class="col-lg-4">
-      <%# 'position-sticky' udrží formulář na obrazovce i když uživatel scroluje dlouhým seznamem místností %>
-      <div class="position-sticky" style="top: 2rem;">
+      <%# Přidali jsme 'align-self-start', aby sloupec nerostl s levou stranou,
+      a vynutili jsme viditelný přetečení %>
+      <div class="position-sticky" style="top: 2rem; z-index: 1020; overflow: visible !important;">
         <%= turbo_frame_tag "new_room_form" do %>
-          <div class="card shadow-sm border-0 bg-light">
-            <div class="card-body p-4">
+          <%# Karta NESMÍ mít overflow: hidden (což Bootstrap karty občas mají kvůli zaoblení) %>
+          <div class="card shadow-sm border-0 bg-light" style="overflow: visible !important;">
+            <div class="card-body p-4" style="overflow: visible !important;">
               <h3 class="h5 mb-4 text-primary">Přidat novou místnost</h3>
               <%= render "rooms/form", building: @building, room: Room.new %>
             </div>
@@ -115,7 +109,12 @@
       </div>
 
       <%# 3. Formulář pro novou zprávu %>
-      <%= form_with model: [@building, BuildingNote.new], class: "d-flex gap-2" do |f| %>
+      <%= form_with model: [@building, BuildingNote.new],
+                    data: {
+                      controller: "reset-form",
+                      action: "turbo:submit-end->reset-form#reset"
+                    },
+                    class: "d-flex gap-2" do |f| %>
         <%= f.text_field :body, class: "form-control", placeholder: "Napište provozní zprávu...", autocomplete: "off", required: true %>
         <%= f.button type: "submit", class: "btn btn-primary" do %>
           <i class="bi bi-send"></i>

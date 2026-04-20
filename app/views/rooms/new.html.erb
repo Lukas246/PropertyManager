@@ -1,11 +1,45 @@
-<% content_for :title, "New room" %>
+<% content_for :title, "Nová místnost | PropertyManager" %>
 
-<h1>New room</h1>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
 
-<%= render "form", room: @room %>
+      <%# Navigace zpět %>
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Místnosti", rooms_path, class: "text-decoration-none" %></li>
+          <li class="breadcrumb-item active" aria-current="page">Nová místnost</li>
+        </ol>
+      </nav>
 
-<br>
+      <%# Karta s formulářem %>
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white py-4 border-bottom-0">
+          <div class="d-flex align-items-center">
+            <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3 text-success d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <i class="bi bi-door-open-fill fs-4"></i>
+            </div>
+            <div>
+              <h1 class="h4 mb-0 fw-bold">Vytvořit místnost</h1>
+              <p class="text-muted small mb-0">Definujte prostor pro evidenci majetku.</p>
+            </div>
+          </div>
+        </div>
 
-<div>
-  <%= link_to "Back to rooms", rooms_path %>
+        <%# Přidali jsme 'style="overflow: visible !important;"' %>
+        <div class="card-body px-4 pt-2 pb-4" style="overflow: visible !important;">
+          <hr class="mt-0 mb-4 opacity-10">
+
+          <%= render "form", room: @room %>
+        </div>
+
+        <div class="card-footer bg-light border-top-0 py-3 text-center">
+          <%= link_to rooms_path, class: "btn btn-link btn-sm text-decoration-none text-muted" do %>
+            <i class="bi bi-arrow-left me-1"></i> Zrušit a jít zpět
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>

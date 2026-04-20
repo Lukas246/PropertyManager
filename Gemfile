@@ -58,12 +58,10 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  gem "factory_bot_rails"
+  gem "faker"
 end
 
-group :development, :test do
-  gem "factory_bot_rails"
-  gem "faker" # Pro generování náhodných jmen/emailů
-end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
@@ -73,6 +71,12 @@ group :test do
   gem "selenium-webdriver"
 end
 
+group :development do
+  gem "bullet"
+end
+
 gem "kaminari", "~> 1.2"
 
 gem "ransack", "~> 4.4"
+
+gem "rqrcode", "~> 3.2"

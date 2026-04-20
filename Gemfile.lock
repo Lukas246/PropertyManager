@@ -87,6 +87,9 @@ GEM
     brakeman (8.0.4)
       racc
     builder (3.3.0)
+    bullet (8.1.0)
+      activesupport (>= 3.0.0)
+      uniform_notifier (~> 1.11)
     bundler-audit (0.9.3)
       bundler (>= 1.2.0)
       thor (~> 1.0)
@@ -100,6 +103,7 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    chunky_png (1.4.0)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
     crass (1.0.6)
@@ -323,6 +327,10 @@ GEM
       actionpack (>= 7.0)
       railties (>= 7.0)
     rexml (3.4.4)
+    rqrcode (3.2.0)
+      chunky_png (~> 1.0)
+      rqrcode_core (~> 2.0)
+    rqrcode_core (2.1.0)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -430,6 +438,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
+    uniform_notifier (1.18.0)
     uri (1.1.1)
     useragent (0.16.11)
     warden (1.2.9)
@@ -457,6 +466,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   brakeman
+  bullet
   bundler-audit
   cancancan
   capybara
@@ -477,6 +487,7 @@ DEPENDENCIES
   rails (~> 8.1.1)
   ransack (~> 4.4)
   redis
+  rqrcode (~> 3.2)
   rspec-rails
   rubocop-rails-omakase
   selenium-webdriver

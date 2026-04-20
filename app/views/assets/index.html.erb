@@ -31,10 +31,56 @@
       </div>
 
       <%# Přesná shoda ID místnosti %>
-      <div class="col-md-4 col-lg-2">
+      <div class="col-md-4 col-lg-2"
+           data-controller="custom-dropdown"
+           data-action="click@window->custom-dropdown#hide">
+
         <%= f.label :room_id_eq, "Místnost", class: "form-label small fw-bold" %>
-        <%= f.collection_select :room_id_eq, @available_rooms, :id, :name, { include_blank: "Všechny místnosti" }, { class: "form-select" } %>
+
+        <div class="dropdown position-relative">
+          <%# Skryté pole pro Ransack %>
+          <%= f.hidden_field :room_id_eq, data: { "custom-dropdown-target": "input" } %>
+
+          <%# Tlačítko - vypadá jako select %>
+          <button type="button"
+                  class="form-select text-start d-flex justify-content-between align-items-center"
+                  data-action="custom-dropdown#toggle">
+      <span data-custom-dropdown-target="label">
+        <%= @available_rooms.find_by(id: params.dig(:q, :room_id_eq))&.name || "Všechny místnosti" %>
+      </span>
+          </button>
+
+          <%# Menu - defaultně schované pomocí d-none %>
+          <div data-custom-dropdown-target="menu"
+               class="d-none position-absolute z-3 w-100 bg-white border rounded shadow-lg mt-1"
+               style="max-height: 250px; overflow-y: auto;">
+
+            <button type="button" class="dropdown-item py-2"
+                    data-action="custom-dropdown#select" data-id="" data-name="Všechny místnosti">
+              <em>Všechny místnosti</em>
+            </button>
+
+            <% @available_rooms.each do |room| %>
+              <button type="button" class="dropdown-item py-2"
+                      data-action="custom-dropdown#select"
+                      data-id="<%= room.id %>"
+                      data-name="<%= room.name %>">
+                <%= room.name %>
+              </button>
+            <% end %>
+          </div>
+        </div>
       </div>
+
+<%# 5. Malý pomocný skript (nebo nový Stimulus controller) %>
+      <script>
+          function selectRoom(id, name) {
+              document.getElementById('selected-room-id').value = id;
+              document.getElementById('room-label').innerText = name;
+              // Tady můžeme volitelně formulář rovnou odeslat:
+              // document.getElementById('selected-room-id').form.requestSubmit();
+          }
+      </script>
 
       <%# Datum pořízení OD a DO (Greater Than or Equal, Less Than or Equal) %>
       <div class="col-md-2">
@@ -105,7 +151,7 @@
             </th>
 
             <%# 6. Akce (Doprava) %>
-            <th class="text-end pe-4">Akce</th>
+            <th class="text-center pe-4">Akce</th>
           </tr>
           </thead>
 
@@ -146,8 +192,8 @@
               </td>
 
               <%# 6. Akce %>
-              <td class="text-end pe-4 text-nowrap">
-                <div class="d-flex justify-content-end gap-2">
+              <td class="text-center pe-4 text-nowrap">
+                <div class="d-flex justify-content-center gap-2">
                   <%= link_to asset_path(asset), class: "btn btn-sm btn-outline-primary", title: "Detail" do %>
                     <i class="bi bi-eye"></i>
                   <% end %>

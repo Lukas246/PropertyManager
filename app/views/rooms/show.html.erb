@@ -1,10 +1,132 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, "#{@room.name} | Detail místnosti" %>
 
-<%= render @room %>
+<div class="container py-4">
+  <%# 1. Horní navigace a akce %>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><%= link_to "Místnosti", rooms_path, class: "text-decoration-none" %></li>
+        <li class="breadcrumb-item active"><%= @room.name %></li>
+      </ol>
+    </nav>
 
-<div>
-  <%= link_to "Edit this room", edit_room_path(@room) %> |
-  <%= link_to "Back to rooms", rooms_path %>
+    <div class="d-flex gap-2">
+      <%= link_to edit_room_path(@room), class: "btn btn-outline-secondary btn-sm rounded-3" do %>
+        <i class="bi bi-pencil me-1"></i> Upravit
+      <% end %>
+      <%= link_to rooms_path, class: "btn btn-light btn-sm rounded-3 text-muted" do %>
+        <i class="bi bi-arrow-left me-1"></i> Zpět
+      <% end %>
+    </div>
+  </div>
 
-  <%= button_to "Destroy this room", @room, method: :delete %>
+  <%# 2. Hlavní přehled (Karty) %>
+  <div class="row g-4">
+    <%# Levý sloupec: Info o místnosti %>
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-4">
+            <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary me-3">
+              <i class="bi bi-door-open fs-3"></i>
+            </div>
+            <div>
+              <h2 class="h4 fw-bold mb-0"><%= @room.name %></h2>
+              <span class="badge bg-light text-secondary border">Kód: <%= @room.code %></span>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="p-3 border rounded-3 bg-light bg-opacity-50">
+                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem;">Budova</small>
+                <% if @room.building %>
+                  <%= link_to @room.building.name, building_path(@room.building), class: "text-decoration-none fw-bold text-dark" %>
+                  <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i><%= @room.building.address %></div>
+                <% else %>
+                  <span class="text-muted">Nepřiřazeno</span>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 border rounded-3 bg-light bg-opacity-50">
+                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem;">Založeno v systému</small>
+                <div class="fw-bold text-dark">
+                  <%= @room.room_created_at&.strftime("%d. %m. %Y") || "Neuvedeno" %>
+                </div>
+                <div class="small text-muted">Poslední změna: <%= l @room.updated_at, format: :short %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%# 3. Seznam majetku v této místnosti (napojení na Assets) %>
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white py-3 border-bottom-0 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-box-seam me-2 text-primary"></i>Majetek v místnosti</h5>
+          <span class="badge bg-primary rounded-pill"><%= @room.assets.count %> položek</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted small text-uppercase">
+              <tr>
+                <th class="ps-4">Název majetku</th>
+                <th>Kód</th>
+                <th class="text-end pe-4">Akce</th>
+              </tr>
+              </thead>
+              <tbody>
+              <% if @room.assets.any? %>
+                <% @room.assets.each do |asset| %>
+                  <tr>
+                    <td class="ps-4">
+                      <div class="fw-bold text-dark"><%= asset.name %></div>
+                      <div class="small text-muted">Cena: <%= number_to_currency(asset.purchase_price, unit: "Kč", precision: 0, format: "%n %u") %></div>
+                    </td>
+                    <td><code class="small text-secondary"><%= asset.code %></code></td>
+                    <td class="text-end pe-4">
+                      <%= link_to asset_path(asset), class: "btn btn-sm btn-light rounded-circle" do %>
+                        <i class="bi bi-chevron-right"></i>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="3" class="text-center py-4 text-muted small">
+                    V této místnosti zatím není evidován žádný majetek.
+                  </td>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Pravý sloupec: Statistiky a Smazání %>
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 rounded-4 mb-4 bg-primary text-white text-center p-4">
+        <div class="display-5 fw-bold mb-0"><%= number_to_currency(@room.assets.sum(:purchase_price), unit: "Kč", precision: 0, format: "%n %u") %></div>
+        <div class="small opacity-75">Celková hodnota majetku v místnosti</div>
+      </div>
+
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-3">Nebezpečná zóna</h6>
+          <p class="text-muted small">Smazáním místnosti dojde k odpojení veškerého majetku, který se v ní nachází.</p>
+          <div class="d-grid">
+            <%= button_to @room, method: :delete,
+                          class: "btn btn-outline-danger btn-sm rounded-3",
+                          form: { data: { turbo_confirm: "Opravdu chcete smazat místnost #{@room.name}?" } } do %>
+              <i class="bi bi-trash me-1"></i> Smazat místnost
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,145 +1,243 @@
-<% content_for :title, "Evidence majetku" %>
+<% content_for :title, "#{@asset.name} | Evidence majetku" %>
 
-<div class="container-fluid py-4">
-
-  <%# Flash zprávy %>
-  <% if notice.present? %>
-    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-      <%= notice %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
-    </div>
-  <% end %>
-
-  <%# Hlavička stránky %>
+<div class="container py-4">
+  <%# 1. Navigace a akce %>
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0">📦 Evidence majetku</h1>
-    <% if can? :create, Asset %>
-      <%= link_to "Přidat nový majetek", new_asset_path, class: "btn btn-primary shadow-sm" %>
-    <% end %>
-  </div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><%= link_to "Majetek", assets_path, class: "text-decoration-none" %></li>
+        <li class="breadcrumb-item active"><%= @asset.name %></li>
+      </ol>
+    </nav>
 
-  <%# Filtrační panel %>
-  <div class="card shadow-sm border-0 mb-4 bg-light">
-    <div class="card-body">
-      <h5 class="card-title text-secondary mb-3 fs-6 text-uppercase fw-bold">
-        <i class="bi bi-funnel me-2"></i>Filtrování dat
-      </h5>
-
-      <%= form_with url: assets_path, method: :get, local: true do |f| %>
-        <%# row g-3 zajistí responzivní mřížku pro filtry %>
-        <div class="row g-3">
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :query, "Hledat (název, kód)", class: "form-label small fw-bold" %>
-            <%= f.text_field :query, value: params[:query], placeholder: "Zadejte text...", class: "form-control" %>
-          </div>
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :room_id, "Místnost", class: "form-label small fw-bold" %>
-            <%= f.collection_select :room_id, Room.all, :id, :name, { include_blank: "Všechny místnosti", selected: params[:room_id] }, { class: "form-select" } %>
-          </div>
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :purchase_date_from, "Nakoupeno od", class: "form-label small fw-bold" %>
-            <%= f.date_field :purchase_date_from, value: params[:purchase_date_from], class: "form-control" %>
-          </div>
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :purchase_date_to, "Nakoupeno do", class: "form-label small fw-bold" %>
-            <%= f.date_field :purchase_date_to, value: params[:purchase_date_to], class: "form-control" %>
-          </div>
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :price_from, "Min. cena (Kč)", class: "form-label small fw-bold" %>
-            <%= f.number_field :price_from, value: params[:price_from], placeholder: "Od...", class: "form-control" %>
-          </div>
-
-          <div class="col-md-4 col-lg-2">
-            <%= f.label :price_to, "Max. cena (Kč)", class: "form-label small fw-bold" %>
-            <%= f.number_field :price_to, value: params[:price_to], placeholder: "Do...", class: "form-control" %>
-          </div>
-
-        </div>
-
-        <%# Tlačítka filtrů a exportu %>
-        <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top align-items-center">
-          <%= f.submit "Použít filtry", name: nil, class: "btn btn-primary" %>
-          <%= link_to "Zrušit vše", assets_path, class: "btn btn-secondary" %>
-
-          <%# Třída ms-auto automaticky odsune tlačítko exportu úplně doprava %>
-          <div class="ms-auto">
-            <%= link_to assets_path(request.query_parameters.merge(format: :csv)), class: "btn btn-success" do %>
-              <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportovat CSV
-            <% end %>
-          </div>
-        </div>
+    <div class="d-flex gap-2">
+      <%= link_to edit_asset_path(@asset), class: "btn btn-outline-secondary btn-sm rounded-3" do %>
+        <i class="bi bi-pencil me-1"></i> Upravit
+      <% end %>
+      <%= link_to assets_path, class: "btn btn-light btn-sm rounded-3 text-muted" do %>
+        <i class="bi bi-arrow-left me-1"></i> Zpět
       <% end %>
     </div>
   </div>
 
-  <%# Tabulka majetku %>
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+  <div class="row g-4">
 
-          <thead class="table-light text-muted">
-          <tr>
-            <th class="ps-4">Název majetku</th>
-            <th>Kód</th>
-            <th>Umístění</th>
-            <th>Cena</th>
-            <th class="text-end pe-4">Akce</th>
-          </tr>
-          </thead>
 
-          <tbody id="assets_list">
-          <% if @assets.any? %>
-            <% @assets.each do |asset| %>
-              <tr>
-                <td class="ps-4 fw-bold text-dark">
-                  <%= asset.name %>
-                </td>
-                <td>
-                  <span class="text-secondary font-monospace bg-light px-2 py-1 rounded"><%= asset.code %></span>
-                </td>
-                <td>
-                  <% if asset.room && asset.room.building %>
-                    <%= asset.room.building.name %> / <%= asset.room.name %>
-                  <% else %>
-                    <span class="text-muted fst-italic">Nepřiřazeno</span>
-                  <% end %>
-                </td>
-                <td>
-                  <%= number_to_currency(asset.purchase_price, unit: "Kč", format: "%n %u", precision: 0) %>
-                </td>
-                <td class="text-end pe-4">
-                  <div class="d-flex justify-content-end gap-2">
-                    <%= link_to "Detail", asset_path(asset), class: "btn btn-sm btn-outline-primary" %>
-                    <% if can? :update, asset %>
-                      <%= link_to "Upravit", edit_asset_path(asset), class: "btn btn-sm btn-outline-secondary" %>
-                    <% end %>
 
-                    <%# Přidal jsem i tlačítko Smazat pro konzistenci s budovami/místnostmi, pokud ho nechcete, stačí řádek smazat %>
-                    <% if can? :destroy, asset %>
-                      <%= button_to "Smazat", asset, method: :delete, class: "btn btn-sm btn-outline-danger", form: { class: "d-inline", data: { turbo_confirm: "Opravdu chcete majetek '#{asset.name}' smazat?" } } %>
+    <%# LEVÝ SLOUPEC: Hlavní info %>
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-start justify-content-between mb-4">
+            <div class="d-flex align-items-center">
+              <div class="bg-warning bg-opacity-10 p-3 rounded-3 text-warning me-3">
+                <i class="bi bi-box-seam fs-2"></i>
+              </div>
+              <div>
+                <h2 class="h3 fw-bold mb-1"><%= @asset.name %></h2>
+                <span class="badge bg-dark rounded-pill">Inv. číslo: <%= @asset.code %></span>
+              </div>
+            </div>
+            <%# Signalizace stavu revize %>
+            <% if @asset.last_inspection_date && @asset.last_inspection_date < 1.year.ago %>
+              <div class="badge bg-danger-subtle text-danger p-2 px-3 rounded-pill border border-danger border-opacity-25">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Vyžaduje revizi
+              </div>
+            <% else %>
+              <div class="badge bg-success-subtle text-success p-2 px-3 rounded-pill border border-success border-opacity-25">
+                <i class="bi bi-check-circle-fill me-1"></i> V pořádku
+              </div>
+            <% end %>
+          </div>
+
+          <div class="row g-4 pt-2">
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Finanční údaje</label>
+              <div class="p-3 bg-light rounded-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Pořizovací cena:</span>
+                  <span class="fw-bold"><%= number_to_currency(@asset.purchase_price, unit: "Kč", precision: 0, format: "%n %u") %></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Datum pořízení:</span>
+                  <span class="fw-bold"><%= @asset.purchase_date&.strftime("%d. %m. %Y") || "Neuvedeno" %></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Údržba a revize</label>
+              <div class="p-3 bg-light rounded-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Poslední kontrola:</span>
+                  <span class="fw-bold text-<%= @asset.last_inspection_date.nil? ? 'danger' : 'dark' %>">
+                    <%= @asset.last_inspection_date&.strftime("%d. %m. %Y") || "Nikdy" %>
+                  </span>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                  <span>Příští revize:</span>
+                  <span><%= (@asset.last_inspection_date + 1.year).strftime("%m / %Y") if @asset.last_inspection_date %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <% if @asset.note.present? %>
+            <div class="mt-4 pt-3 border-top">
+              <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Poznámka / Popis</label>
+              <div class="p-3 bg-light bg-opacity-50 rounded-3 italic">
+                "<%= @asset.note %>"
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @asset.attachments.attached? %>
+        <div class="row g-2 mb-4">
+          <% @asset.attachments.each_with_index do |image, index| %>
+            <div class="<%= index == 0 ? 'col-md-8' : 'col-md-4' %>">
+              <div class="ratio ratio-16x9">
+                <%= image_tag image.variant(resize_to_limit: [800, 600]),
+                              class: "rounded-4 object-fit-cover shadow-sm border",
+                              data: { bs_toggle: "modal", bs_target: "#imageModal#{image.id}" } %>
+              </div>
+            </div>
+
+            <%# Jednoduchý lightbox (Bootstrap Modal) pro zvětšení %>
+            <div class="modal fade" id="imageModal<%= image.id %>" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content bg-transparent border-0">
+                  <div class="modal-body p-0 text-center">
+                    <%= image_tag image, class: "img-fluid rounded-4 shadow-lg" %>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Historie změn (PaperTrail) - nyní bezpečně bez volání uživatelů %>
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom-0">
+          <h5 class="mb-0 fw-bold small text-uppercase text-muted">
+            <i class="bi bi-clock-history me-2 text-primary"></i>Historie změn
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush small">
+            <%# Procházíme verze od nejnovější po nejstarší %>
+            <% @asset.versions.reverse.each do |version| %>
+              <%
+                # Pokusíme se najít uživatele, který změnu provedl (whodunnit ukládá ID uživatele)
+                user = User.find_by(id: version.whodunnit)
+                user_name = user&.full_name || "Neznámý uživatel"
+              %>
+
+              <li class="list-group-item py-3 px-4 border-start border-4 <%= version.event == 'create' ? 'border-success bg-light bg-opacity-25' : 'border-primary' %>">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong class="text-dark">
+                      <%= case version.event
+                          when 'create' then "Vytvoření záznamu"
+                          when 'update' then "Úprava údajů"
+                          else "Změna"
+                          end %>
+                    </strong>
+                    <div class="text-muted" style="font-size: 0.8rem;">
+                      Provedl/a: <span class="fw-bold text-secondary"><%= user_name %></span>
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <span class="text-muted d-block"><%= l version.created_at, format: :short %></span>
+                    <% if version.event == 'update' %>
+                      <span class="badge bg-light text-primary border fw-normal" style="font-size: 0.65rem;">verze v<%= version.index + 1 %></span>
                     <% end %>
                   </div>
-                </td>
-              </tr>
-            <% end %>
-          <% else %>
-            <%# Prázdný stav tabulky %>
-            <tr>
-              <td colspan="5" class="text-center text-muted py-5 border-0">
-                <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
-                Nenalezen žádný majetek. Zkuste upravit filtry nebo přidejte nový.
-              </td>
-            </tr>
-          <% end %>
-          </tbody>
+                </div>
 
-        </table>
+                <%# Volitelně: Pokud chceš vidět, co se přesně změnilo %>
+                <% if version.changeset.present? %>
+                  <div class="mt-2 p-2 bg-white rounded border-dashed small text-muted" style="border: 1px dashed #dee2e6;">
+                    <% version.changeset.each do |field, values| %>
+                      <% next if ['updated_at', 'created_at'].include?(field) %>
+                      <div>
+                        <i class="bi bi-dot"></i> <strong><%= field.humanize %>:</strong>
+                        <span class="text-decoration-line-through opacity-50"><%= values[0] || "---" %></span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span class="text-dark fw-medium"><%= values[1] %></span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+
+            <%# Pokud zatím nejsou žádné verze (PaperTrail nebyl aktivní) %>
+            <% if @asset.versions.empty? %>
+              <li class="list-group-item py-4 text-center text-muted">
+                <i class="bi bi-info-circle me-1"></i> Historie tohoto majetku nebyla zatím zaznamenána.
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <%# PRAVÝ SLOUPEC: Umístění a akce %>
+    <div class="col-lg-4">
+      <%# Karta umístění %>
+      <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
+        <div class="card-header bg-primary text-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill me-2"></i>Aktuální poloha</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.65rem;">Budova</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-building me-2 text-primary"></i>
+              <strong class="text-dark"><%= @asset.room&.building&.name || "Neznámá budova" %></strong>
+            </div>
+            <div class="ms-4 small text-muted"><%= @asset.room&.building&.address %></div>
+          </div>
+
+          <div class="mb-1">
+            <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.65rem;">Místnost</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-door-open me-2 text-primary"></i>
+              <%= link_to @asset.room&.name, room_path(@asset.room), class: "text-decoration-none fw-bold text-dark border-bottom border-primary border-2" %>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-light border-0 py-3">
+          <%= link_to room_path(@asset.room), class: "btn btn-white btn-sm w-100 shadow-sm border rounded-pill" do %>
+            Zobrazit celou místnost
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 rounded-4 text-center p-4 bg-white mb-4">
+        <div class="qr-code-container mb-2">
+          <%= render_qr_code(@asset) %>
+        </div>
+        <div class="small fw-bold text-dark mt-2">SKENOVAT PRO INVENTURU</div>
+        <div class="text-muted small">ID: <%= @asset.code %></div>
+
+        <%# Tlačítko pro tisk štítku %>
+        <button onclick="window.print();" class="btn btn-sm btn-outline-light text-dark border mt-3 rounded-pill">
+          <i class="bi bi-printer me-1"></i> Tisknout štítek
+        </button>
+      </div>
+
+      <%# Nebezpečná zóna %>
+      <div class="d-grid mt-4">
+        <%= button_to @asset, method: :delete,
+                      class: "btn btn-link btn-sm text-danger text-decoration-none",
+                      form: { data: { turbo_confirm: "Opravdu chcete vyřadit tento majetek z evidence?" } } do %>
+          <i class="bi bi-trash me-1"></i> Vyřadit majetek (smazat)
+        <% end %>
       </div>
     </div>
   </div>

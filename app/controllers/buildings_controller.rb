@@ -9,6 +9,7 @@ class BuildingsController < ApplicationController
 
   # GET /buildings/1 or /buildings/1.json
   def show
+    @buildings = Building.accessible_by(current_ability).includes(building_notes: :user).order(:name)
   end
 
   # GET /buildings/new

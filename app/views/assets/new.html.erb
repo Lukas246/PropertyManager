@@ -1,6 +1,42 @@
-<h1>Nový majetek</h1>
+<% content_for :title, "Nový majetek | PropertyManager" %>
 
-<%= render "form", asset: @asset %>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
 
-<br>
-<%= link_to "Zpět na seznam", assets_path %>
+      <%# Navigace %>
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Majetek", assets_path, class: "text-decoration-none" %></li>
+          <li class="breadcrumb-item active" aria-current="page">Nový záznam</li>
+        </ol>
+      </nav>
+
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-4 border-bottom-0">
+          <div class="d-flex align-items-center">
+            <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3 text-warning d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <i class="bi bi-box-seam fs-4"></i>
+            </div>
+            <div>
+              <h1 class="h4 mb-0 fw-bold">Evidence nového majetku</h1>
+              <p class="text-muted small mb-0">Zadejte parametry předmětu a přiřaďte mu umístění.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body px-4 pt-2 pb-4">
+          <hr class="mt-0 mb-4 opacity-10">
+          <%= render "form", asset: @asset %>
+        </div>
+
+        <div class="card-footer bg-light border-top-0 py-3 text-center">
+          <%= link_to assets_path, class: "btn btn-link btn-sm text-decoration-none text-muted" do %>
+            <i class="bi bi-arrow-left me-1"></i> Zpět na seznam majetku
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

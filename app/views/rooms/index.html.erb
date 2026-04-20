@@ -22,65 +22,21 @@
 
           <thead class="table-light text-muted">
           <tr>
-            <th class="ps-4">Název místnosti</th>
-            <th>Kód</th>
-            <th>Přiřazená budova</th>
-            <th>Přidáno</th>
-            <th>Stav</th>
-            <th class="text-end pe-4">Akce</th>
+            <th class="ps-4"><%= sort_link(@q, :name, "Název místnosti") %></th>
+            <th class="text-center"><%= sort_link(@q, :code, "Kód") %></th>
+            <th class="text-center"><%= sort_link(@q, :building_name, "Budova") %></th>
+            <th class="text-center">Stav</th>
+            <th class="text-center"><%= sort_link(@q, :room_created_at, "Přidáno") %></th>
+            <th class="text-center">Akce</th>
           </tr>
           </thead>
 
-          <tbody>
+          <tbody id="rooms">
           <% if @rooms.any? %>
-            <% @rooms.each do |room| %>
-              <tr>
-                <td class="ps-4 fw-bold text-dark">
-                  <%= room.name %>
-                </td>
-                <td>
-                  <span class="text-secondary font-monospace bg-light px-2 py-1 rounded"><%= room.code %></span>
-                </td>
-                <td>
-                  <%# Pokud místnost patří budově, vypíšeme její jméno a uděláme z něj odkaz na detail budovy %>
-                  <% if room.building %>
-                    <%= link_to room.building.name, building_path(room.building), class: "text-decoration-none" %>
-                  <% else %>
-                    <span class="text-muted fst-italic">Bez budovy</span>
-                  <% end %>
-                </td>
-                <td>
-                  <%= room.room_created_at&.strftime("%d. %m. %Y") %>
-                </td>
-                <td>
-                  <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Aktivní</span>
-                </td>
-                <td class="text-end pe-4">
-
-                  <div class="d-flex justify-content-end gap-2">
-                    <%= link_to "Detail", room_path(room), class: "btn btn-sm btn-outline-primary" %>
-                    <%= link_to "Upravit", edit_room_path(room), class: "btn btn-sm btn-outline-secondary" %>
-
-                    <%= button_to "Smazat", room,
-                                  method: :delete,
-                                  class: "btn btn-sm btn-outline-danger",
-                                  form: {
-                                    class: "d-inline",
-                                    data: { turbo_confirm: "Opravdu chcete smazat místnost '#{room.name}'?" }
-                                  }
-                    %>
-                  </div>
-
-                </td>
-              </tr>
-            <% end %>
+            <%= render partial: "rooms/room_row", collection: @rooms, as: :room, cached: true %>
           <% else %>
-            <%# Prázdný stav %>
             <tr>
-              <td colspan="6" class="text-center text-muted py-5 border-0">
-                <i class="bi bi-door-open fs-1 d-block mb-2"></i>
-                Zatím nemáte v systému žádné místnosti.
-              </td>
+              <td colspan="5" class="text-center py-5 text-muted">Žádné místnosti.</td>
             </tr>
           <% end %>
           </tbody>

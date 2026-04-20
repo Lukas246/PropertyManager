@@ -1,0 +1,59 @@
+<tr>
+  <%# 1. Název %>
+  <td class="ps-4 fw-bold text-dark align-middle">
+    <%= room.name %>
+  </td>
+
+  <%# 2. Kód %>
+  <td class="text-center align-middle">
+    <code class="text-secondary bg-light px-2 py-1 rounded small"><%= room.code %></code>
+  </td>
+
+  <%# 3. Budova %>
+  <td class="text-center small text-muted align-middle">
+    <% if room.building %>
+      <%= link_to room.building.name, building_path(room.building), class: "text-decoration-none fw-bold" %>
+    <% else %>
+      <span class="text-black-25">-</span>
+    <% end %>
+  </td>
+
+  <%# 4. Stav %>
+  <td class="text-center align-middle">
+    <%# Tady doplň svou logiku pro stav. Dávám sem příklad s badge. %>
+    <span class="badge bg-success rounded-pill fw-normal">Aktivní</span>
+  </td>
+
+  <%# 5. Čas) %>
+  <td class="text-center small text-muted align-middle">
+    <% if room.room_created_at %>
+      <%= room.room_created_at.strftime("%d.%m.%Y") %>
+    <% else %>
+      <span class="text-black-25">-</span>
+    <% end %>
+  </td>
+
+  <%# 6. Akce %>
+  <td class="text-center pe-4 text-nowrap align-middle">
+    <div class="d-flex justify-content-center gap-2">
+      <%= link_to room_path(room), class: "btn btn-sm btn-outline-primary", title: "Detail" do %>
+        <i class="bi bi-eye"></i>
+      <% end %>
+
+      <% if can? :update, room %>
+        <%= link_to edit_room_path(room), class: "btn btn-sm btn-outline-secondary", title: "Upravit" do %>
+          <i class="bi bi-pencil"></i>
+        <% end %>
+      <% end %>
+
+      <% if can? :destroy, room %>
+        <%= button_to room, method: :delete,
+                      class: "btn btn-sm btn-outline-danger",
+                      form: { class: "d-inline", data: { turbo_confirm: "Opravdu smazat místnost #{room.name}?" } },
+                      title: "Smazat" do %>
+          <i class="bi bi-trash"></i>
+        <% end %>
+      <% end %>
+    </div>
+  </td>
+</tr>

@@ -4,7 +4,7 @@ class AssetsController < ApplicationController
 
   # GET /assets or /assets.json
   def index
-    @q = Asset.accessible_by(current_ability).ransack(params[:q])
+    @q = Asset.accessible_by(current_ability).includes(room: :building).ransack(params[:q])
 
     if current_user.role == "admin"
       @assets = Asset.all

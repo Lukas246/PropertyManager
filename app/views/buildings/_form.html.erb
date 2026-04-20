@@ -1,59 +1,122 @@
-<%= form_with(model: building) do |form| %>
+<%= form_with(model: building, class: "needs-validation") do |f| %>
   <% if building.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(building.errors.count, "error") %> prohibited this building from being saved:</h2>
-
-      <ul>
-        <% building.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+    <div class="alert alert-danger border-0 shadow-sm mb-4">
+      <div class="d-flex">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>
+          <h5 class="alert-heading h6 fw-bold">Při ukládání došlo k chybám:</h5>
+          <ul class="mb-0 small">
+            <% building.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :name, style: "display: block" %>
-    <%= form.text_field :name %>
-  </div>
+  <div class="row g-3">
+    <%# 1. Sekce: Základní údaje %>
+    <div class="col-md-8">
+      <%= f.label :name, "Název budovy", class: "form-label fw-semibold small" %>
+      <%= f.text_field :name, class: "form-control rounded-3", placeholder: "např. Centrála Praha" %>
+    </div>
 
-  <div>
-    <%= form.label :code, style: "display: block" %>
-    <%= form.text_field :code %>
-  </div>
+    <div class="col-md-4">
+      <%= f.label :code, "Interní kód", class: "form-label fw-semibold small" %>
+      <%= f.text_field :code, class: "form-control rounded-3", placeholder: "PRG-01" %>
+    </div>
 
-  <div>
-    <%= form.label :address, style: "display: block" %>
-    <%= form.text_field :address %>
-  </div>
-
-  <div>
-    <%= form.label :contact_person_email, style: "display: block" %>
-    <%= form.text_field :contact_person_email %>
-  </div>
-
-  <div>
-    <%= form.label :contact_person_phone, style: "display: block" %>
-    <%= form.text_field :contact_person_phone %>
-  </div>
-
-  <div>
-    <%= form.label :building_created_at, style: "display: block" %>
-    <%= form.date_field :building_created_at %>
-  </div>
-
-  <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
-    <strong>Přiřazení správců:</strong>
-    <p style="font-size: 0.8em; color: #666;">Vyberte uživatele s rolí správce, kteří mají k této budově přístup.</p>
-
-    <%= form.collection_check_boxes :manager_ids, User.where(role: :spravce), :id, :email do |b| %>
-      <div style="display: block;">
-        <%= b.check_box %>
-        <%= b.label %>
+    <div class="col-12">
+      <%= f.label :address, "Adresa", class: "form-label fw-semibold small" %>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted">
+          <i class="bi bi-geo-alt"></i>
+        </span>
+        <%= f.text_field :address, class: "form-control border-start-0 rounded-end-3", placeholder: "Ulice, číslo, město" %>
       </div>
-    <% end %>
-  </div>
+    </div>
 
-  <div>
-    <%= form.submit %>
+    <%# 2. Sekce: Kontakt %>
+    <div class="col-12 mt-4">
+      <h6 class="fw-bold text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">Kontaktní osoba</h6>
+    </div>
+
+    <div class="col-md-6">
+      <%= f.label :contact_person_email, "E-mail", class: "form-label fw-semibold small" %>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted">
+          <i class="bi bi-envelope"></i>
+        </span>
+        <%= f.email_field :contact_person_email, class: "form-control border-start-0 rounded-end-3", placeholder: "jmeno@firma.cz" %>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <%= f.label :contact_person_phone, "Telefon", class: "form-label fw-semibold small" %>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 rounded-start-3 text-muted">
+          <i class="bi bi-telephone"></i>
+        </span>
+        <%= f.text_field :contact_person_phone, class: "form-control border-start-0 rounded-end-3", placeholder: "+420 ..." %>
+      </div>
+    </div>
+
+    <%# 3. Sekce: Datum %>
+    <div class="col-md-6 mt-3">
+      <%= f.label :building_created_at, "Datum uvedení do provozu", class: "form-label fw-semibold small" %>
+      <%= f.date_field :building_created_at, class: "form-control rounded-3" %>
+    </div>
+
+    <%# 4. Sekce: Přiřazení správců %>
+    <div class="col-12 mt-4">
+      <h6 class="fw-bold text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 1px;">
+        Přiřazení správci (můžete vybrat více)
+      </h6>
+
+      <div class="card border shadow-none rounded-3 mt-2">
+        <%# Vyhledávací pole (volitelné, pro vizuální efekt) %>
+        <div class="card-header bg-light border-bottom-0 py-2">
+          <div class="input-group input-group-sm">
+        <span class="input-group-text bg-transparent border-0 text-muted">
+          <i class="bi bi-search"></i>
+        </span>
+            <input type="text" class="form-control bg-transparent border-0 ps-0" placeholder="Hledat správce..." id="user-search">
+          </div>
+        </div>
+
+        <%# Seznam správců s checkboxem %>
+        <div class="card-body p-0" style="max-height: 200px; overflow-y: auto;">
+          <ul class="list-group list-group-flush">
+            <%# Filtrujeme pouze uživatele s rolí 'spravce' nebo 'admin' %>
+            <%= f.collection_check_boxes :manager_ids, User.where(role: [:spravce, :admin]), :id, :full_name do |b| %>
+              <label class="list-group-item list-group-item-action d-flex align-items-center border-0 px-3 py-2 cursor-pointer">
+                <%= b.check_box class: "form-check-input me-3" %>
+                <div>
+                  <span class="d-block fw-medium"><%= b.text %></span>
+                  <span class="text-muted small"><%= b.object.email %></span>
+                </div>
+                <% if b.object.role == "admin" %>
+                  <span class="badge bg-info-subtle text-info rounded-pill ms-auto small">Admin</span>
+                <% end %>
+              </label>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+      <div class="form-text mt-2">
+        <i class="bi bi-info-circle me-1"></i> Vybraní uživatelé budou mít oprávnění spravovat tuto budovu a její majetek.
+      </div>
+    </div>
+
+    <%# Tlačítka %>
+    <div class="col-12 mt-5">
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <%= link_to "Zrušit", buildings_path, class: "btn btn-light px-4 rounded-3 text-muted" %>
+        <%= f.button type: "submit", class: "btn btn-primary px-5 rounded-3 shadow-sm" do %>
+          <i class="bi bi-check-lg me-1"></i> Uložit budovu
+        <% end %>
+      </div>
+    </div>
   </div>
 <% end %>
