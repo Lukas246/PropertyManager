@@ -105,7 +105,7 @@
 
       <%# 2. Seznam zpráv (sem budou přiskakovat nové) %>
       <div id="notes_list" class="mb-4" style="max-height: 400px; overflow-y: auto;">
-        <%= render @building.building_notes.order(created_at: :asc) %>
+        <%= render @building_notes%>
       </div>
 
       <%# 3. Formulář pro novou zprávu %>

@@ -36,10 +36,10 @@ module Api
 
       def audit_log
         # Najdeme majetek s kontrolou oprávnění
-        asset = Asset.accessible_by(current_ability).find(params[:id])
+        @asset = Asset.includes(versions: :item).find(params[:id])
 
         # Získáme log přes službu
-        render json: Assets::AuditLogService.call(asset)
+        render json: Assets::AuditLogService.call(@asset)
       end
 
       private

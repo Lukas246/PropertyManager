@@ -2,7 +2,7 @@
 
 <div class="container py-4">
   <%# 1. Navigace a akce %>
-  <div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><%= link_to "Majetek", assets_path, class: "text-decoration-none" %></li>
@@ -21,9 +21,6 @@
   </div>
 
   <div class="row g-4">
-
-
-
     <%# LEVÝ SLOUPEC: Hlavní info %>
     <div class="col-lg-8">
       <div class="card shadow-sm border-0 rounded-4 mb-4">
@@ -35,19 +32,15 @@
               </div>
               <div>
                 <h2 class="h3 fw-bold mb-1"><%= @asset.name %></h2>
-                <span class="badge bg-dark rounded-pill">Inv. číslo: <%= @asset.code %></span>
+                <span class="badge bg-dark rounded-pill small">Inv. číslo: <%= @asset.code %></span>
               </div>
             </div>
-            <%# Signalizace stavu revize %>
-            <% if @asset.last_inspection_date && @asset.last_inspection_date < 1.year.ago %>
-              <div class="badge bg-danger-subtle text-danger p-2 px-3 rounded-pill border border-danger border-opacity-25">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> Vyžaduje revizi
-              </div>
-            <% else %>
-              <div class="badge bg-success-subtle text-success p-2 px-3 rounded-pill border border-success border-opacity-25">
-                <i class="bi bi-check-circle-fill me-1"></i> V pořádku
-              </div>
-            <% end %>
+
+            <%# Stav revize vyčleněn do logiky %>
+            <div class="badge p-2 px-3 rounded-pill border <%= @asset.last_inspection_date && @asset.last_inspection_date < 1.year.ago ? 'bg-danger-subtle text-danger border-danger border-opacity-25' : 'bg-success-subtle text-success border-success border-opacity-25' %>">
+              <i class="bi <%= @asset.last_inspection_date && @asset.last_inspection_date < 1.year.ago ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill' %> me-1"></i>
+              <%= @asset.last_inspection_date && @asset.last_inspection_date < 1.year.ago ? 'Vyžaduje revizi' : 'V pořádku' %>
+            </div>
           </div>
 
           <div class="row g-4 pt-2">
@@ -60,7 +53,7 @@
                 </div>
                 <div class="d-flex justify-content-between">
                   <span class="text-muted">Datum pořízení:</span>
-                  <span class="fw-bold"><%= @asset.purchase_date&.strftime("%d. %m. %Y") || "Neuvedeno" %></span>
+                  <span class="fw-bold"><%= l(@asset.purchase_date, format: :default) if @asset.purchase_date %></span>
                 </div>
               </div>
             </div>
@@ -71,12 +64,12 @@
                 <div class="d-flex justify-content-between mb-2">
                   <span class="text-muted">Poslední kontrola:</span>
                   <span class="fw-bold text-<%= @asset.last_inspection_date.nil? ? 'danger' : 'dark' %>">
-                    <%= @asset.last_inspection_date&.strftime("%d. %m. %Y") || "Nikdy" %>
+                    <%= @asset.last_inspection_date ? l(@asset.last_inspection_date) : "Nikdy" %>
                   </span>
                 </div>
                 <div class="d-flex justify-content-between text-muted small">
                   <span>Příští revize:</span>
-                  <span><%= (@asset.last_inspection_date + 1.year).strftime("%m / %Y") if @asset.last_inspection_date %></span>
+                  <span><%= l(@asset.last_inspection_date + 1.year, format: "%m / %Y") if @asset.last_inspection_date %></span>
                 </div>
               </div>
             </div>
@@ -85,7 +78,7 @@
           <% if @asset.note.present? %>
             <div class="mt-4 pt-3 border-top">
               <label class="text-muted small fw-bold text-uppercase mb-2 d-block">Poznámka / Popis</label>
-              <div class="p-3 bg-light bg-opacity-50 rounded-3 italic">
+              <div class="p-3 bg-light bg-opacity-50 rounded-3 fst-italic text-secondary">
                 "<%= @asset.note %>"
               </div>
             </div>
@@ -93,23 +86,24 @@
         </div>
       </div>
 
+      <%# Obrázky - optimalizováno pro výkon %>
       <% if @asset.attachments.attached? %>
-        <div class="row g-2 mb-4">
-          <% @asset.attachments.each_with_index do |image, index| %>
+        <div class="row g-2 mb-4 d-print-none">
+          <% @asset.attachments.each_with_index do |attachment, index| %>
             <div class="<%= index == 0 ? 'col-md-8' : 'col-md-4' %>">
               <div class="ratio ratio-16x9">
-                <%= image_tag image.variant(resize_to_limit: [800, 600]),
-                              class: "rounded-4 object-fit-cover shadow-sm border",
-                              data: { bs_toggle: "modal", bs_target: "#imageModal#{image.id}" } %>
+                <%= image_tag attachment.variant(resize_to_limit: [800, 600]),
+                              class: "rounded-4 object-fit-cover shadow-sm border cursor-pointer",
+                              data: { bs_toggle: "modal", bs_target: "#imageModal#{attachment.id}" } %>
               </div>
             </div>
 
-            <%# Jednoduchý lightbox (Bootstrap Modal) pro zvětšení %>
-            <div class="modal fade" id="imageModal<%= image.id %>" tabindex="-1" aria-hidden="true">
+            <%# Lightbox Modal %>
+            <div class="modal fade" id="imageModal<%= attachment.id %>" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content bg-transparent border-0">
                   <div class="modal-body p-0 text-center">
-                    <%= image_tag image, class: "img-fluid rounded-4 shadow-lg" %>
+                    <%= image_tag attachment, class: "img-fluid rounded-4 shadow-lg" %>
                     <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
                   </div>
                 </div>
@@ -119,8 +113,8 @@
         </div>
       <% end %>
 
-      <%# Historie změn (PaperTrail) - nyní bezpečně bez volání uživatelů %>
-      <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+      <%# HISTORIE ZMĚN - Nyní blesková bez N+1 dotazů %>
+      <div class="card shadow-sm border-0 rounded-4 overflow-hidden d-print-none">
         <div class="card-header bg-white py-3 border-bottom-0">
           <h5 class="mb-0 fw-bold small text-uppercase text-muted">
             <i class="bi bi-clock-history me-2 text-primary"></i>Historie změn
@@ -128,14 +122,7 @@
         </div>
         <div class="card-body p-0">
           <ul class="list-group list-group-flush small">
-            <%# Procházíme verze od nejnovější po nejstarší %>
             <% @asset.versions.reverse.each do |version| %>
-              <%
-                # Pokusíme se najít uživatele, který změnu provedl (whodunnit ukládá ID uživatele)
-                user = User.find_by(id: version.whodunnit)
-                user_name = user&.full_name || "Neznámý uživatel"
-              %>
-
               <li class="list-group-item py-3 px-4 border-start border-4 <%= version.event == 'create' ? 'border-success bg-light bg-opacity-25' : 'border-primary' %>">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
@@ -143,11 +130,14 @@
                       <%= case version.event
                           when 'create' then "Vytvoření záznamu"
                           when 'update' then "Úprava údajů"
-                          else "Změna"
+                          else version.event.humanize
                           end %>
                     </strong>
                     <div class="text-muted" style="font-size: 0.8rem;">
-                      Provedl/a: <span class="fw-bold text-secondary"><%= user_name %></span>
+                      Provedl/a: <span class="fw-bold text-secondary">
+                      <%# Tady už nepoužíváme User.find_by, ale vazbu z kontroleru %>
+                      <%= version.user&.full_name || "Systém / #{version.whodunnit}" %>
+                    </span>
                     </div>
                   </div>
                   <div class="text-end">
@@ -158,14 +148,13 @@
                   </div>
                 </div>
 
-                <%# Volitelně: Pokud chceš vidět, co se přesně změnilo %>
                 <% if version.changeset.present? %>
                   <div class="mt-2 p-2 bg-white rounded border-dashed small text-muted" style="border: 1px dashed #dee2e6;">
                     <% version.changeset.each do |field, values| %>
                       <% next if ['updated_at', 'created_at'].include?(field) %>
                       <div>
-                        <i class="bi bi-dot"></i> <strong><%= field.humanize %>:</strong>
-                        <span class="text-decoration-line-through opacity-50"><%= values[0] || "---" %></span>
+                        <i class="bi bi-dot"></i> <strong><%= Asset.human_attribute_name(field) %>:</strong>
+                        <span class="text-decoration-line-through opacity-50"><%= values[0].presence || "---" %></span>
                         <i class="bi bi-arrow-right mx-1"></i>
                         <span class="text-dark fw-medium"><%= values[1] %></span>
                       </div>
@@ -175,20 +164,17 @@
               </li>
             <% end %>
 
-            <%# Pokud zatím nejsou žádné verze (PaperTrail nebyl aktivní) %>
             <% if @asset.versions.empty? %>
-              <li class="list-group-item py-4 text-center text-muted">
-                <i class="bi bi-info-circle me-1"></i> Historie tohoto majetku nebyla zatím zaznamenána.
-              </li>
+              <li class="list-group-item py-4 text-center text-muted">Bez záznamů v historii.</li>
             <% end %>
           </ul>
         </div>
       </div>
     </div>
 
-    <%# PRAVÝ SLOUPEC: Umístění a akce %>
+    <%# PRAVÝ SLOUPEC %>
     <div class="col-lg-4">
-      <%# Karta umístění %>
+      <%# Karta umístění - používá preloaded vazby %>
       <div class="card shadow-sm border-0 rounded-4 mb-4 overflow-hidden">
         <div class="card-header bg-primary text-white py-3">
           <h6 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill me-2"></i>Aktuální poloha</h6>
@@ -198,7 +184,7 @@
             <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.65rem;">Budova</small>
             <div class="d-flex align-items-center">
               <i class="bi bi-building me-2 text-primary"></i>
-              <strong class="text-dark"><%= @asset.room&.building&.name || "Neznámá budova" %></strong>
+              <strong class="text-dark"><%= @asset.room&.building&.name || "Neuvedeno" %></strong>
             </div>
             <div class="ms-4 small text-muted"><%= @asset.room&.building&.address %></div>
           </div>
@@ -207,14 +193,12 @@
             <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.65rem;">Místnost</small>
             <div class="d-flex align-items-center">
               <i class="bi bi-door-open me-2 text-primary"></i>
-              <%= link_to @asset.room&.name, room_path(@asset.room), class: "text-decoration-none fw-bold text-dark border-bottom border-primary border-2" %>
+              <%= link_to @asset.room&.name, room_path(@asset.room), class: "text-decoration-none fw-bold text-dark border-bottom border-primary border-2" if @asset.room %>
             </div>
           </div>
         </div>
-        <div class="card-footer bg-light border-0 py-3">
-          <%= link_to room_path(@asset.room), class: "btn btn-white btn-sm w-100 shadow-sm border rounded-pill" do %>
-            Zobrazit celou místnost
-          <% end %>
+        <div class="card-footer bg-light border-0 py-3 d-print-none">
+          <%= link_to "Zobrazit celou místnost", room_path(@asset.room), class: "btn btn-white btn-sm w-100 shadow-sm border rounded-pill" if @asset.room %>
         </div>
       </div>
 
@@ -224,19 +208,16 @@
         </div>
         <div class="small fw-bold text-dark mt-2">SKENOVAT PRO INVENTURU</div>
         <div class="text-muted small">ID: <%= @asset.code %></div>
-
-        <%# Tlačítko pro tisk štítku %>
-        <button onclick="window.print();" class="btn btn-sm btn-outline-light text-dark border mt-3 rounded-pill">
+        <button onclick="window.print();" class="btn btn-sm btn-outline-light text-dark border mt-3 rounded-pill d-print-none">
           <i class="bi bi-printer me-1"></i> Tisknout štítek
         </button>
       </div>
 
-      <%# Nebezpečná zóna %>
-      <div class="d-grid mt-4">
+      <div class="d-grid mt-4 d-print-none">
         <%= button_to @asset, method: :delete,
                       class: "btn btn-link btn-sm text-danger text-decoration-none",
-                      form: { data: { turbo_confirm: "Opravdu chcete vyřadit tento majetek z evidence?" } } do %>
-          <i class="bi bi-trash me-1"></i> Vyřadit majetek (smazat)
+                      form: { data: { turbo_confirm: "Opravdu chcete vyřadit tento majetek?" } } do %>
+          <i class="bi bi-trash me-1"></i> Vyřadit majetek
         <% end %>
       </div>
     </div>

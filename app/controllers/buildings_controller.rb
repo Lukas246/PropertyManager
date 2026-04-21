@@ -4,12 +4,21 @@ class BuildingsController < ApplicationController
 
   # GET /buildings or /buildings.json
   def index
+    # Předpokládám, že ListService už v sobě má .includes(:managers) nebo podobně
     @buildings = Buildings::ListService.call(current_user, current_ability)
   end
 
-  # GET /buildings/1 or /buildings/1.json
+  # GET /buildings/1
   def show
-    @buildings = Building.accessible_by(current_ability).includes(building_notes: :user).order(:name)
+    @building = Building.find(params[:id])
+
+    # 2. DROP-DOWN PRO MÍSTNOSTI:
+    @buildings = Building.accessible_by(current_ability).order(:name)
+
+    @building_notes = @building.building_notes.includes(:user).order(created_at: :asc)
+
+    # 3. PŘÍPRAVA PRO FORMULÁŘ:
+    @room = Room.new(building: @building)
   end
 
   # GET /buildings/new

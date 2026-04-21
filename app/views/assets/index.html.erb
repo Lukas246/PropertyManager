@@ -20,7 +20,6 @@
     <% end %>
   </div>
 
-  <%# Původní form_with nahradíme tímto: %>
   <%= search_form_for @q, url: assets_path, method: :get, local: true do |f| %>
     <div class="row g-3">
 
@@ -72,13 +71,11 @@
         </div>
       </div>
 
-<%# 5. Malý pomocný skript (nebo nový Stimulus controller) %>
+<%# 5. Malý pomocný skript %>
       <script>
           function selectRoom(id, name) {
               document.getElementById('selected-room-id').value = id;
               document.getElementById('room-label').innerText = name;
-              // Tady můžeme volitelně formulář rovnou odeslat:
-              // document.getElementById('selected-room-id').form.requestSubmit();
           }
       </script>
 
