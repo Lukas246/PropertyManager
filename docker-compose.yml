@@ -1,0 +1,48 @@
+services:
+  # 1. REDIS: Pro kešování a frontu úkolů (Sidekiq)
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # 2. WEB: Samotná Rails aplikace
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./bin/rails server -b 0.0.0.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - redis
+    stdin_open: true # Umožňuje interaktivní debugování (binding.break)
+    tty: true
+
+  # 3. WORKER: Proces pro úkoly na pozadí (CSV exporty)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - redis
+      - web
+
+volumes:
+  bundle_cache: # Aby se gemy neinstalovaly znovu při každém restartu
+  redis_data:   # Aby tvoje keš v Redisu přežila restart Dockeru

@@ -1,8 +1,14 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
+# 1. Tady je ta nejdůležitější změna pro vývoj:
+# Smažeme případný zaseknutý PID soubor z minulého spuštění
+rm -f /rails/tmp/pids/server.pid
+
+# 2. Tvá původní logika pro přípravu databáze:
+# Pokud spouštíme rails server, zkusíme vytvořit/zmigrovat DB
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
 fi
 
+# 3. Spustíme hlavní příkaz (který je definovaný v Dockerfilu jako CMD)
 exec "${@}"
