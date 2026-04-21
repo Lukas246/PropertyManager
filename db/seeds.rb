@@ -81,7 +81,7 @@ puts "  ✅ Správci byli přiřazeni k budovám."
 
 
 puts "🚪 --- Vytvářím místnosti ---"
-room_types = ["Kancelář", "Zasedačka", "Sklad", "Kuchyňka", "IT oddělení", "Serverovna", "Recepce"]
+room_types = [ "Kancelář", "Zasedačka", "Sklad", "Kuchyňka", "IT oddělení", "Serverovna", "Recepce" ]
 rooms = []
 
 buildings.each do |building|
@@ -117,10 +117,10 @@ rooms.each do |room|
       room: room,
       purchase_date: Faker::Date.backward(days: 1500),
       # Někdy majetek má revizi, někdy je nil (pro otestování warningů ve view)
-      last_inspection_date: [Faker::Date.backward(days: 400)].sample,
+      last_inspection_date: [ Faker::Date.backward(days: 400) ].sample,
       purchase_price: Faker::Commerce.price(range: 1500..65000),
       # Poznámku přidáme jen u zhruba 30 % majetku
-      note: [Faker::Lorem.sentence, "", ""].sample
+      note: [ Faker::Lorem.sentence, "", "" ].sample
     )
     assets_created += 1
   end

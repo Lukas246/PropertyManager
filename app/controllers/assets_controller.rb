@@ -6,10 +6,10 @@ class AssetsController < ApplicationController
   def index
     @assets = if current_user.role == "admin"
                 Asset.all
-              elsif current_user.role == "spravce"
+    elsif current_user.role == "spravce"
                 Asset.joins(room: { building: :building_assignments })
                      .where(building_assignments: { user_id: current_user.id })
-              else
+    else
                 Asset.none
     end
     @assets = @assets.includes(room: :building)
@@ -106,13 +106,13 @@ class AssetsController < ApplicationController
     base_query = Asset.find(params[:id])
 
     @asset = case action_name
-             when "show"
+    when "show"
                # Pro show chceme VŠECHNO (kvůli historii a detailům)
-               Asset.includes({ room: :building }, { versions: [:item, :user] }, :attachments_attachments).find(params[:id])
-             when "edit"
+               Asset.includes({ room: :building }, { versions: [ :item, :user ] }, :attachments_attachments).find(params[:id])
+    when "edit"
                # Pro edit nám stačí jen majetek a jeho obrázky (pokud je ve formuláři ukazuješ)
                Asset.includes(:attachments_attachments).find(params[:id])
-             else
+    else
                # Pro update, destroy atd. stačí čistý základ
                base_query
     end

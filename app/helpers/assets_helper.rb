@@ -1,5 +1,4 @@
 module AssetsHelper
-
   def render_qr_code(asset)
     # URL adresa, kterou QR kód otevře
     url = asset_url(asset, host: request.host_with_port)

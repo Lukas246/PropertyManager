@@ -37,7 +37,7 @@ class CsvExportJob < ApplicationJob
   private
   def generate_csv(assets)
     CSV.generate(col_sep: ";", encoding: "UTF-8") do |csv|
-      csv << ["\xEF\xBB\xBFID", "Název", "Kód", "Budova", "Místnost", "Cena", "Datum nákupu"]
+      csv << [ "\xEF\xBB\xBFID", "Název", "Kód", "Budova", "Místnost", "Cena", "Datum nákupu" ]
       assets.each do |asset|
         csv << [
           asset.id,

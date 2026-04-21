@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-
   describe "validace" do
     it "je validní s kompletními údaji z továrny" do
       expect(build(:user)).to be_valid

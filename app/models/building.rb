@@ -8,11 +8,11 @@ class Building < ApplicationRecord
   validates :code, uniqueness: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["name", "code"]
+    [ "name", "code" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
-    ["rooms"]
+    [ "rooms" ]
   end
 
   private

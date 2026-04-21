@@ -5,7 +5,6 @@ class BuildingNotesController < ApplicationController
     @note.user = current_user
 
     @note.save
-
   end
 
   private

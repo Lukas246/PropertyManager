@@ -62,7 +62,7 @@ RSpec.describe "Api::V1::Assets", type: :request do
 
       # Ověření struktury vráceného JSONu podle naší služby
       expect(last_version["event"]).to eq("update")
-      expect(last_version["changes"]["name"]).to eq(["Starý stůl", "Nový stůl"])
+      expect(last_version["changes"]["name"]).to eq([ "Starý stůl", "Nový stůl" ])
       expect(last_version["whodunnit"]).to eq(user.email)
     end
   end
