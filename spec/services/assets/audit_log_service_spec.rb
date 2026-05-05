@@ -11,7 +11,7 @@ RSpec.describe Assets::AuditLogService, type: :service do
       id: 101,
       event: 'create',
       whodunnit: nil,
-      changeset: { 'name' => [nil, 'První majetek'] },
+      changeset: { 'name' => [ nil, 'První majetek' ] },
       created_at: 2.hours.ago
     )
   end
@@ -22,7 +22,7 @@ RSpec.describe Assets::AuditLogService, type: :service do
       id: 102,
       event: 'update',
       whodunnit: user.id.to_s,
-      changeset: { 'value' => [100, 200] },
+      changeset: { 'value' => [ 100, 200 ] },
       created_at: 1.hour.ago
     )
   end
@@ -33,7 +33,7 @@ RSpec.describe Assets::AuditLogService, type: :service do
 
     # Nastavíme mocky pro vazby assetu
     allow(asset).to receive(:id).and_return(55)
-    allow(asset).to receive(:versions).and_return([version_1, version_2])
+    allow(asset).to receive(:versions).and_return([ version_1, version_2 ])
     # Simulace pro výpočet cache_key
     allow(asset.versions).to receive(:maximum).with(:created_at).and_return(version_2.created_at)
   end
@@ -48,7 +48,7 @@ RSpec.describe Assets::AuditLogService, type: :service do
 
       expect(result.last[:event]).to eq('update')
       expect(result.last[:whodunnit]).to eq('test@example.com')
-      expect(result.last[:changes]).to eq({ 'value' => [100, 200] })
+      expect(result.last[:changes]).to eq({ 'value' => [ 100, 200 ] })
     end
 
     it 'používá cache pro výsledek transformace' do
