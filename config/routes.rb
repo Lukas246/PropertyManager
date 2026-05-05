@@ -17,7 +17,6 @@ Rails.application.routes.draw do
   # 2. Cesty pro API (JSON)
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      # Váš stávající inventář rozšířený o audit_log
       resources :assets, path: "inventory", only: [ :index, :create, :update, :destroy ] do
         member do
           get :audit_log

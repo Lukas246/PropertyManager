@@ -1,5 +1,5 @@
 module Api
-  module V1 # Musí tu být V1, ne Path1
+  module V1
     class BaseController < ActionController::API
       before_action :authenticate_user!
 

@@ -11,7 +11,7 @@ module Assets
             id: version.id,
             event: version.event, # create, update, destroy
             whodunnit: find_user_name(version.whodunnit),
-            changes: version.changeset, # Vyžaduje zapnuté object_changes v PaperTrail
+            changes: version.changeset,
             created_at: version.created_at
           }
         end
@@ -22,9 +22,6 @@ module Assets
 
     def self.find_user_name(whodunnit)
       return "Systém" if whodunnit.blank?
-
-      # Tady je dobré použít malou cache na jména uživatelů,
-      # aby se neprováděl DB dotaz na Usera u každého řádku logu
       Rails.cache.fetch("user_name/#{whodunnit}", expires_in: 1.hour) do
         User.find_by(id: whodunnit)&.email || "Neznámý uživatel (#{whodunnit})"
       end

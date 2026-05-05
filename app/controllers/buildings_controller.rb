@@ -4,7 +4,6 @@ class BuildingsController < ApplicationController
 
   # GET /buildings or /buildings.json
   def index
-    # Předpokládám, že ListService už v sobě má .includes(:managers) nebo podobně
     @buildings = Buildings::ListService.call(current_user, current_ability)
   end
 

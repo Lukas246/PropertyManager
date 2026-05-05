@@ -25,7 +25,6 @@ module Rooms
         "rooms",
         "role-#{user.role}",
         "v1",
-        # Rychlý SQL dotaz na zjištění, jestli se jakákoliv místnost změnila
         Room.maximum(:updated_at).to_i
       ]
     end
